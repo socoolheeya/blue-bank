@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: account
+
+server:
+  port: 8080
+
+# Feign Client 설정
+feign:
+  account:
+    url: http://localhost:8080  # Account 서비스 URL
+  client:
+    config:
+      default:
+        connectTimeout: 5000      # 연결 타임아웃 (ms)
+        readTimeout: 10000        # 읽기 타임아웃 (ms)
+        loggerLevel: basic        # 로깅 레벨
+      account-service:
+        connectTimeout: 3000
+        readTimeout: 5000
+
+# Logging 설정
+logging:
+  level:
+    com.socoolheeya.bluebank.account.adapter: DEBUG  # Feign Client 로깅

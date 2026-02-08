@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: account
+
+  main:
+    allow-bean-definition-overriding: true
+
+  # H2 Database for Testing
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # JPA Settings
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
