@@ -1,6 +1,8 @@
 package com.socoolheeya.bluebank.card.service
 
-import com.socoolheeya.bluebank.card.data.domain.CardEnums.*
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CardApplicationStatus
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CardProductType
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CardType
 import com.socoolheeya.bluebank.card.data.domain.command.CardApplicationCommand
 import com.socoolheeya.bluebank.card.data.domain.command.CardCommand
 import com.socoolheeya.bluebank.card.data.service.CardApplicationDataService
@@ -94,7 +96,7 @@ class CardApplicationService(
             hasOverseasUsage = true,
             creditLimit = application.approvedCreditLimit,
             annualFee = getAnnualFee(application.productType),
-            moimAccountId = application.moimAccountId,
+            moimAccountId = application.accountId,
             applicationId = applicationId,
             issueFee = getIssueFee(application.productType)
         )

@@ -1,7 +1,16 @@
 package com.socoolheeya.bluebank.card.data.domain.entity
 
-import com.socoolheeya.bluebank.card.data.domain.CardEnums.*
-import jakarta.persistence.*
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CardApplicationStatus
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CardProductType
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CardType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 import java.math.BigDecimal
 import java.time.LocalDateTime
 

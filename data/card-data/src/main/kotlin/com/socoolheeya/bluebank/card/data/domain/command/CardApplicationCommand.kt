@@ -1,6 +1,7 @@
 package com.socoolheeya.bluebank.card.data.domain.command
 
-import com.socoolheeya.bluebank.card.data.domain.CardEnums.*
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CardProductType
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CardType
 import com.socoolheeya.bluebank.card.data.domain.entity.CardApplication
 import java.math.BigDecimal
 
