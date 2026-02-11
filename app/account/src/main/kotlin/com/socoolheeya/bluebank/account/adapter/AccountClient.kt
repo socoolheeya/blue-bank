@@ -4,6 +4,7 @@ import com.socoolheeya.bluebank.account.dto.AccountDto
 import com.socoolheeya.bluebank.account.dto.AccountFeignConfiguration
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.*
+import java.math.BigDecimal
 
 /**
  * Account 내부 API 통신용 Feign Client
@@ -52,9 +53,9 @@ interface AccountClient {
  */
 data class BalanceDto(
     val accountId: Long,
-    val ledgerBalance: java.math.BigDecimal,
-    val availableBalance: java.math.BigDecimal,
-    val holdBalance: java.math.BigDecimal
+    val ledgerBalance: BigDecimal,
+    val availableBalance: BigDecimal,
+    val holdBalance: BigDecimal
 )
 
 /**
