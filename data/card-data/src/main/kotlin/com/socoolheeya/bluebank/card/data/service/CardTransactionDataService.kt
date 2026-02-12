@@ -1,6 +1,9 @@
 package com.socoolheeya.bluebank.card.data.service
 
-import com.socoolheeya.bluebank.card.data.domain.CardEnums.*
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CardStatus
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.BenefitStatus
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.BenefitType
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CashbackType
 import com.socoolheeya.bluebank.card.data.domain.command.TransactionCommand
 import com.socoolheeya.bluebank.card.data.domain.entity.CashbackHistory
 import com.socoolheeya.bluebank.card.data.domain.result.TransactionResult

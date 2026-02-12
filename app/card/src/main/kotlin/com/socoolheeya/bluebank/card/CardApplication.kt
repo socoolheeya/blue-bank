@@ -11,9 +11,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients
 @ConfigurationPropertiesScan(basePackages = [
     "com.socoolheeya.bluebank.card"
 ])
-@EnableFeignClients(basePackages = [
-    "com.socoolheeya.bluebank.account.adapter"
-])
 class CardApplication
 
 fun main(args: Array<String>) {

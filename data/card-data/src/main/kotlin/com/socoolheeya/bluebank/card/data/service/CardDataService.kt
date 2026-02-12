@@ -1,6 +1,6 @@
 package com.socoolheeya.bluebank.card.data.service
 
-import com.socoolheeya.bluebank.card.data.domain.CardEnums.*
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CardStatus
 import com.socoolheeya.bluebank.card.data.domain.command.CardCommand
 import com.socoolheeya.bluebank.card.data.domain.result.CardResult
 import com.socoolheeya.bluebank.card.data.repository.CardRepository

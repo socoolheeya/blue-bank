@@ -1,6 +1,6 @@
 package com.socoolheeya.bluebank.loan.service
 
-import com.socoolheeya.bluebank.account.adapter.AccountClient
+import com.socoolheeya.bluebank.loan.client.AccountClient
 import com.socoolheeya.bluebank.loan.data.domain.LoanEnums
 import com.socoolheeya.bluebank.loan.data.domain.command.LoanCommand
 import com.socoolheeya.bluebank.loan.data.service.LoanDataService

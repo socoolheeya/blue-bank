@@ -1,0 +1,265 @@
+version: '3.8'
+
+services:
+  # Eureka Server (단일 인스턴스)
+  eureka-server:
+    build: ./infra/eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - bluebank-network
+
+  # API Gateway (단일 인스턴스 - 로드밸런서 역할)
+  api-gateway:
+    build: ./infra/api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - bluebank-network
+
+  # Account Service - Instance 1
+  account-service-1:
+    build: ./app/account
+    container_name: account-service-1
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=account
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:accountdb
+      - EUREKA_INSTANCE_INSTANCE_ID=account-service-1
+      - SERVER_PORT=8081
+    depends_on:
+      - eureka-server
+    networks:
+      - bluebank-network
+
+  # Account Service - Instance 2
+  account-service-2:
+    build: ./app/account
+    container_name: account-service-2
+    ports:
+      - "8091:8091"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=account
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:accountdb
+      - EUREKA_INSTANCE_INSTANCE_ID=account-service-2
+      - SERVER_PORT=8091
+    depends_on:
+      - eureka-server
+    networks:
+      - bluebank-network
+
+  # Account Service - Instance 3
+  account-service-3:
+    build: ./app/account
+    container_name: account-service-3
+    ports:
+      - "8101:8101"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=account
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:accountdb
+      - EUREKA_INSTANCE_INSTANCE_ID=account-service-3
+      - SERVER_PORT=8101
+    depends_on:
+      - eureka-server
+    networks:
+      - bluebank-network
+
+  # Deposit Service - Instance 1
+  deposit-service-1:
+    build: ./app/deposit
+    container_name: deposit-service-1
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=deposit
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:depositdb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_INSTANCE_INSTANCE_ID=deposit-service-1
+      - SERVER_PORT=8084
+    depends_on:
+      - eureka-server
+      - account-service-1
+    networks:
+      - bluebank-network
+
+  # Deposit Service - Instance 2
+  deposit-service-2:
+    build: ./app/deposit
+    container_name: deposit-service-2
+    ports:
+      - "8094:8094"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=deposit
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:depositdb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_INSTANCE_INSTANCE_ID=deposit-service-2
+      - SERVER_PORT=8094
+    depends_on:
+      - eureka-server
+      - account-service-1
+    networks:
+      - bluebank-network
+
+  # Deposit Service - Instance 3
+  deposit-service-3:
+    build: ./app/deposit
+    container_name: deposit-service-3
+    ports:
+      - "8104:8104"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=deposit
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:depositdb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_INSTANCE_INSTANCE_ID=deposit-service-3
+      - SERVER_PORT=8104
+    depends_on:
+      - eureka-server
+      - account-service-1
+    networks:
+      - bluebank-network
+
+  # Loan Service - Instance 1
+  loan-service-1:
+    build: ./app/loan
+    container_name: loan-service-1
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=loan
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:loandb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_INSTANCE_INSTANCE_ID=loan-service-1
+      - SERVER_PORT=8082
+    depends_on:
+      - eureka-server
+      - account-service-1
+    networks:
+      - bluebank-network
+
+  # Loan Service - Instance 2
+  loan-service-2:
+    build: ./app/loan
+    container_name: loan-service-2
+    ports:
+      - "8092:8092"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=loan
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:loandb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_INSTANCE_INSTANCE_ID=loan-service-2
+      - SERVER_PORT=8092
+    depends_on:
+      - eureka-server
+      - account-service-1
+    networks:
+      - bluebank-network
+
+  # Loan Service - Instance 3
+  loan-service-3:
+    build: ./app/loan
+    container_name: loan-service-3
+    ports:
+      - "8102:8102"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=loan
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:loandb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_INSTANCE_INSTANCE_ID=loan-service-3
+      - SERVER_PORT=8102
+    depends_on:
+      - eureka-server
+      - account-service-1
+    networks:
+      - bluebank-network
+
+  # Card Service - Instance 1
+  card-service-1:
+    build: ./app/card
+    container_name: card-service-1
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=card
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:carddb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_INSTANCE_INSTANCE_ID=card-service-1
+      - SERVER_PORT=8083
+    depends_on:
+      - eureka-server
+      - account-service-1
+    networks:
+      - bluebank-network
+
+  # Card Service - Instance 2
+  card-service-2:
+    build: ./app/card
+    container_name: card-service-2
+    ports:
+      - "8093:8093"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=card
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:carddb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_INSTANCE_INSTANCE_ID=card-service-2
+      - SERVER_PORT=8093
+    depends_on:
+      - eureka-server
+      - account-service-1
+    networks:
+      - bluebank-network
+
+  # Card Service - Instance 3
+  card-service-3:
+    build: ./app/card
+    container_name: card-service-3
+    ports:
+      - "8103:8103"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=card
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:carddb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_INSTANCE_INSTANCE_ID=card-service-3
+      - SERVER_PORT=8103
+    depends_on:
+      - eureka-server
+      - account-service-1
+    networks:
+      - bluebank-network
+
+networks:
+  bluebank-network:
+    driver: bridge

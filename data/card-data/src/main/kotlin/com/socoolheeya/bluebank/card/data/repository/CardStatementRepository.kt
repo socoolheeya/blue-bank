@@ -1,7 +1,7 @@
 package com.socoolheeya.bluebank.card.data.repository
 
 import com.socoolheeya.bluebank.card.data.domain.entity.CardStatement
-import com.socoolheeya.bluebank.card.data.domain.CardEnums.*
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.StatementStatus
 import org.springframework.data.jpa.repository.JpaRepository
 import java.time.LocalDate
 import java.util.*

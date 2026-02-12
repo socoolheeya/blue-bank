@@ -1,5 +1,6 @@
 package com.socoolheeya.bluebank.deposit.service
 
+import com.socoolheeya.bluebank.deposit.adapter.AccountServiceClient
 import com.socoolheeya.bluebank.deposit.data.domain.DepositEnums.DepositProductType
 import com.socoolheeya.bluebank.deposit.data.domain.DepositEnums.PeriodUnit
 import com.socoolheeya.bluebank.deposit.data.domain.command.DepositCommand
@@ -11,10 +12,23 @@ import java.util.*
 
 @Service
 class DepositService(
-    private val depositDataService: DepositDataService
+    private val depositDataService: DepositDataService,
+    private val accountServiceClient: AccountServiceClient
 ) {
 
     fun createDeposit(request: DepositDto.CreateRequest): DepositDto.Response {
+        // 계좌 유효성 검증
+        val accountValidation = accountServiceClient.validateAccount(request.accountId)
+        require(accountValidation.isValid) {
+            "계좌를 사용할 수 없습니다: ${accountValidation.message}"
+        }
+
+        // 계좌 소유자 확인
+        val account = accountServiceClient.getAccount(request.accountId)
+        require(account.customerId == request.customerId) {
+            "본인 명의의 계좌만 사용 가능합니다"
+        }
+
         val depositNumber = generateDepositNumber()
 
         val command = DepositCommand.Create(

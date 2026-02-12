@@ -1,0 +1,132 @@
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      # 서비스 디스커버리를 통한 자동 라우팅
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      # 수동 라우트 설정
+      routes:
+        # Account Service 라우팅
+        - id: account-service
+          uri: lb://ACCOUNT  # 로드밸런싱 with Eureka
+          predicates:
+            - Path=/api/accounts/**
+          filters:
+            - RewritePath=/api/accounts/(?<segment>.*), /${segment}
+            - CircuitBreaker=accountCircuitBreaker
+
+        # Deposit Service 라우팅
+        - id: deposit-service
+          uri: lb://DEPOSIT
+          predicates:
+            - Path=/api/deposits/**
+          filters:
+            - RewritePath=/api/deposits/(?<segment>.*), /${segment}
+            - CircuitBreaker=depositCircuitBreaker
+
+        # Loan Service 라우팅
+        - id: loan-service
+          uri: lb://LOAN
+          predicates:
+            - Path=/api/loans/**
+          filters:
+            - RewritePath=/api/loans/(?<segment>.*), /${segment}
+            - CircuitBreaker=loanCircuitBreaker
+
+        # Card Service 라우팅
+        - id: card-service
+          uri: lb://CARD
+          predicates:
+            - Path=/api/cards/**
+          filters:
+            - RewritePath=/api/cards/(?<segment>.*), /${segment}
+            - CircuitBreaker=cardCircuitBreaker
+
+      # Default filters
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
+        - AddResponseHeader=X-Gateway-Response-Time, ${spring.cloud.gateway.metrics.properties.histogram.percentiles}
+
+      # CORS 설정
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:3000"
+              - "http://localhost:8080"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+            maxAge: 3600
+
+server:
+  port: 8080
+
+# Eureka Client 설정
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    registry-fetch-interval-seconds: 5
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+# Circuit Breaker 설정
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+    instances:
+      accountCircuitBreaker:
+        base-config: default
+        record-exceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.io.IOException
+      depositCircuitBreaker:
+        base-config: default
+      loanCircuitBreaker:
+        base-config: default
+      cardCircuitBreaker:
+        base-config: default
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.netflix.eureka: INFO
+    com.socoolheeya.bluebank.gateway: DEBUG

@@ -1,24 +1,99 @@
 version: '3.8'
 
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: blue-bank-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: bluebank
-      MYSQL_USER: bluebank
-      MYSQL_PASSWORD: bluebank123
+  # Eureka Server
+  eureka-server:
+    build: ./infra/eureka-server
+    container_name: eureka-server
     ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - bluebank-network
 
-volumes:
-  mysql_data:
+  # API Gateway
+  api-gateway:
+    build: ./infra/api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - bluebank-network
+
+  # Account Service
+  account-service:
+    build: ./app/account
+    container_name: account-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:accountdb
+    depends_on:
+      - eureka-server
+    networks:
+      - bluebank-network
+
+  # Deposit Service
+  deposit-service:
+    build: ./app/deposit
+    container_name: deposit-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:depositdb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+    depends_on:
+      - eureka-server
+      - account-service
+    networks:
+      - bluebank-network
+
+  # Loan Service
+  loan-service:
+    build: ./app/loan
+    container_name: loan-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=loan
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:loandb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+    depends_on:
+      - eureka-server
+      - account-service
+    networks:
+      - bluebank-network
+
+  # Card Service
+  card-service:
+    build: ./app/card
+    container_name: card-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_APPLICATION_NAME=card
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:carddb
+      - FEIGN_ACCOUNT_URL=http://account-service:8081
+    depends_on:
+      - eureka-server
+      - account-service
+    networks:
+      - bluebank-network
+
+networks:
+  bluebank-network:
+    driver: bridge

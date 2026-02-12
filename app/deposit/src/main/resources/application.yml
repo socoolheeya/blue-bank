@@ -18,6 +18,15 @@ spring:
 server:
   port: 8084
 
+# Eureka Client 설정
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${spring.cloud.client.hostname:${random.value}}:${server.port:${random.int}}
+
 # Feign Client 설정
 feign:
   account:

@@ -1,0 +1,32 @@
+# 로컬 환경에서 AWS AZ 시뮬레이션
+spring:
+  profiles: local-az
+
+eureka:
+  instance:
+    # 로컬에서 가상 AZ 메타데이터 설정
+    metadata-map:
+      zone: ${ZONE:zone-a}  # zone-a, zone-b, zone-c로 설정 가능
+      datacenter: Local
+      environment: development
+      ami-id: docker-image  # Docker 이미지를 AMI처럼 표시
+      instance-type: container
+
+    # 인스턴스 식별
+    instance-id: ${spring.application.name}:${ZONE:zone-a}:${random.value}
+    hostname: ${spring.application.name}-${ZONE:zone-a}
+
+  client:
+    # 로컬에서 다중 Eureka 서버 시뮬레이션
+    service-url:
+      zone-a: http://eureka-zone-a:8761/eureka/
+      zone-b: http://eureka-zone-b:8762/eureka/
+      zone-c: http://eureka-zone-c:8763/eureka/
+      defaultZone: http://localhost:8761/eureka/
+
+    # 가상 가용 영역 설정
+    availability-zones:
+      local: zone-a,zone-b,zone-c
+
+    region: local
+    prefer-same-zone-eureka: true

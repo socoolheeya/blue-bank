@@ -1,7 +1,7 @@
 package com.socoolheeya.bluebank.card.data.repository
 
 import com.socoolheeya.bluebank.card.data.domain.entity.Card
-import com.socoolheeya.bluebank.card.data.domain.CardEnums.*
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CardStatus
 import org.springframework.data.jpa.repository.JpaRepository
 import java.util.*
 

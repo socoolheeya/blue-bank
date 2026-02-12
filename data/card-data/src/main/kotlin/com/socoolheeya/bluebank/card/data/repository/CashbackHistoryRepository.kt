@@ -1,7 +1,7 @@
 package com.socoolheeya.bluebank.card.data.repository
 
 import com.socoolheeya.bluebank.card.data.domain.entity.CashbackHistory
-import com.socoolheeya.bluebank.card.data.domain.CardEnums.*
+import com.socoolheeya.bluebank.card.data.domain.CardEnums.CashbackStatus
 import org.springframework.data.jpa.repository.JpaRepository
 import java.time.LocalDate
 
