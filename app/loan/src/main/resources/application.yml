@@ -24,23 +24,23 @@ spring:
 server:
   port: 8082
 
-# Eureka Client 설정
-eureka:
-  client:
-    service-url:
-      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
-    registry-fetch-interval-seconds: 5
-    enabled: true
-  instance:
-    prefer-ip-address: true
-    lease-renewal-interval-in-seconds: 5
-    lease-expiration-duration-in-seconds: 10
-    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+# Eureka Client 설정 - blue-bank-gateway 프로젝트에서 관리
+# eureka:
+#   client:
+#     service-url:
+#       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+#     registry-fetch-interval-seconds: 5
+#     enabled: true
+#   instance:
+#     prefer-ip-address: true
+#     lease-renewal-interval-in-seconds: 5
+#     lease-expiration-duration-in-seconds: 10
+#     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
-# Feign Client 설정 - Eureka를 통한 서비스 디스커버리
+# Feign Client 설정
 feign:
   account:
-    url: ${FEIGN_ACCOUNT_URL:lb://ACCOUNT}
+    url: ${FEIGN_ACCOUNT_URL:http://localhost:8081}
   client:
     config:
       default:
