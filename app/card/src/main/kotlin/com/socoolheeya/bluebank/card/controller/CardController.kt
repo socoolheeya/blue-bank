@@ -11,6 +11,11 @@ class CardController(
     private val cardService: CardService
 ) {
 
+    @GetMapping
+    fun test(): String {
+        return "Card Service is running"
+    }
+
     @GetMapping("/{cardId}")
     fun getCard(@PathVariable cardId: Long): ResponseEntity<CardDto.Response> {
         val card = cardService.getCard(cardId)

@@ -11,6 +11,11 @@ class DepositController(
     private val depositService: DepositService
 ) {
 
+    @GetMapping
+    fun test(): String {
+        return "Deposit Service is running"
+    }
+
     @PostMapping
     fun createDeposit(@RequestBody request: DepositDto.CreateRequest): ResponseEntity<DepositDto.Response> {
         val deposit = depositService.createDeposit(request)

@@ -16,6 +16,11 @@ class LoanController(
     private val loanService: LoanService
 ) {
 
+    @GetMapping
+    fun test(): String {
+        return "Loan Service is running"
+    }
+
     @GetMapping("/{loanId}")
     fun getLoan(@PathVariable loanId: Long): ResponseEntity<LoanDto.Response> {
         val loan = loanService.getLoan(loanId)
