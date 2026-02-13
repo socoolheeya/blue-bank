@@ -11,7 +11,3 @@ include("data:account-data")
 include("data:deposit-data")
 include("data:loan-data")
 include("data:card-data")
-
-// Infrastructure Services
-include("infra:eureka-server")
-include("infra:api-gateway")

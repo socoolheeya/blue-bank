@@ -28,15 +28,19 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+    registry-fetch-interval-seconds: 5
+    enabled: true
   instance:
     prefer-ip-address: true
-    instance-id: ${spring.application.name}:${spring.cloud.client.hostname:${random.value}}:${server.port:${random.int}}
+    lease-renewal-interval-in-seconds: 5
+    lease-expiration-duration-in-seconds: 10
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
-# Feign Client 설정
+# Feign Client 설정 - Eureka를 통한 서비스 디스커버리
 feign:
   account:
-    url: http://localhost:8081
+    url: ${FEIGN_ACCOUNT_URL:lb://ACCOUNT}
   client:
     config:
       default:
