@@ -3,18 +3,38 @@ package com.socoolheeya.bluebank.deposit.controller
 import com.socoolheeya.bluebank.deposit.dto.DepositDto
 import com.socoolheeya.bluebank.deposit.exception.DepositNotFoundException
 import com.socoolheeya.bluebank.deposit.service.DepositService
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/deposits")
 class DepositController(
-    private val depositService: DepositService
+    private val depositService: DepositService,
+    @Value($$"${server.port:8080}") private val serverPort: String,
+    @Value($$"${eureka.instance.instance-id:unknown}") private val instanceId: String,
+    @Value($$"${spring.application.name:deposit}") private val appName: String
 ) {
 
     @GetMapping
-    fun test(): String {
-        return "Deposit Service is running"
+    fun test(): ResponseEntity<Map<String, Any>> {
+        // 응답 본문에 인스턴스 정보 포함
+        val responseBody = mapOf(
+            "message" to "Deposit Service is running",
+            "instanceInfo" to mapOf(
+                "port" to serverPort,
+                "instanceId" to instanceId,
+                "serviceName" to appName,
+                "timestamp" to System.currentTimeMillis()
+            )
+        )
+
+        // 응답 헤더에도 인스턴스 정보 추가
+        return ResponseEntity.ok()
+            .header("X-Instance-Port", serverPort)
+            .header("X-Instance-Id", instanceId)
+            .header("X-Service-Name", appName)
+            .body(responseBody)
     }
 
     @GetMapping("/error-test")
