@@ -1,6 +1,7 @@
 package com.socoolheeya.bluebank.deposit.controller
 
 import com.socoolheeya.bluebank.deposit.dto.DepositDto
+import com.socoolheeya.bluebank.deposit.exception.DepositNotFoundException
 import com.socoolheeya.bluebank.deposit.service.DepositService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -14,6 +15,11 @@ class DepositController(
     @GetMapping
     fun test(): String {
         return "Deposit Service is running"
+    }
+
+    @GetMapping("/error-test")
+    fun errorTest(): String {
+        throw DepositNotFoundException("Test deposit not found with ID: 999999")
     }
 
     @PostMapping
