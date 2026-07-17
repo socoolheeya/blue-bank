@@ -26,8 +26,11 @@ val testSupportScenario by testSuite {
     test("Spring context fixture owns a closeable context") {
         val context = SpringContextFixture.start(EmptyTestConfiguration::class.java)
 
-        check(context.isActive)
-        context.close()
+        try {
+            check(context.isActive)
+        } finally {
+            context.close()
+        }
         check(!context.isActive)
     }
 }
