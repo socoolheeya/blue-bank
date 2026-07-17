@@ -81,4 +81,32 @@ val depositServiceScenarios by testSuite("Deposit service scenarios") {
         check(service.getDepositsByCustomer(7).map { it.id } == listOf(first.id))
         check(runCatching { service.getDeposit(Long.MAX_VALUE) }.exceptionOrNull() is IllegalArgumentException)
     }
+
+    test("invalid state transitions and monetary boundaries preserve state balance and commands") {
+        val data = FakeDepositDataService()
+        val service = DepositService(data, FakeAccountServiceClient().apply { addAccount(9, 7) })
+        val id = requireNotNull(service.createDeposit(request(product = "FREE_SAVINGS")).id)
+        fun snapshot() = Triple(service.getDeposit(id).status, service.getDeposit(id).currentBalance, data.contributions.size)
+        val pending = snapshot()
+        check(runCatching { service.deposit(id, 7, DepositDto.DepositRequest(BigDecimal.ONE)) }.exceptionOrNull() is IllegalArgumentException)
+        check(runCatching { service.earlyWithdraw(id, 7, DepositDto.WithdrawRequest(BigDecimal.ONE)) }.exceptionOrNull() is IllegalArgumentException)
+        check(runCatching { service.terminateDeposit(id, 7) }.exceptionOrNull() is IllegalArgumentException)
+        check(snapshot() == pending)
+
+        service.activateDeposit(id, 7)
+        check(runCatching { service.activateDeposit(id, 7) }.exceptionOrNull() is IllegalArgumentException)
+        listOf(BigDecimal.ZERO, BigDecimal("-1")).forEach { amount ->
+            check(runCatching { service.deposit(id, 7, DepositDto.DepositRequest(amount)) }.exceptionOrNull() is IllegalArgumentException)
+            check(runCatching { service.earlyWithdraw(id, 7, DepositDto.WithdrawRequest(amount)) }.exceptionOrNull() is IllegalArgumentException)
+        }
+        check(snapshot() == Triple("활성", BigDecimal.ZERO, 0))
+        service.deposit(id, 7, DepositDto.DepositRequest(BigDecimal.TEN))
+        val funded = snapshot()
+        check(runCatching { service.earlyWithdraw(id, 7, DepositDto.WithdrawRequest(BigDecimal("11"))) }.exceptionOrNull() is IllegalArgumentException)
+        check(snapshot() == funded)
+        service.terminateDeposit(id, 7)
+        val terminated = snapshot()
+        check(runCatching { service.terminateDeposit(id, 7) }.exceptionOrNull() is IllegalArgumentException)
+        check(snapshot() == terminated)
+    }
 }

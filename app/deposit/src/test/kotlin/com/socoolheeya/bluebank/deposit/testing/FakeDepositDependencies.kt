@@ -38,15 +38,27 @@ class FakeDepositDataService : DepositDataService(
     override fun getDepositByNumber(depositNumber: String) = deposits.values.firstOrNull { it.depositNumber == depositNumber }
     override fun getDepositsByCustomer(customerId: Long) = deposits.values.filter { it.customerId == customerId }
 
-    override fun activateDeposit(depositId: Long) = update(depositId) { it.copy(status = DepositStatus.ACTIVE, updatedAt = LocalDateTime.now()) }
+    override fun activateDeposit(depositId: Long) = update(depositId) {
+        require(it.status == DepositStatus.PENDING) { "대기 중인 상품만 활성화 가능합니다" }
+        it.copy(status = DepositStatus.ACTIVE, updatedAt = LocalDateTime.now())
+    }
     override fun earlyWithdraw(depositId: Long, amount: BigDecimal) = update(depositId) {
+        require(it.status == DepositStatus.ACTIVE) { "활성 상태에서만 출금 가능합니다" }
+        require(amount > BigDecimal.ZERO) { "출금액은 0보다 커야 합니다" }
         require(amount <= it.currentBalance) { "잔액 부족" }
         it.copy(currentBalance = it.currentBalance - amount, updatedAt = LocalDateTime.now())
     }
-    override fun terminateDeposit(depositId: Long) = update(depositId) { it.copy(status = DepositStatus.TERMINATED, updatedAt = LocalDateTime.now()) }
+    override fun terminateDeposit(depositId: Long) = update(depositId) {
+        require(it.status == DepositStatus.ACTIVE) { "활성 상태만 해지 가능합니다" }
+        it.copy(status = DepositStatus.TERMINATED, updatedAt = LocalDateTime.now())
+    }
 
     override fun deposit(depositId: Long, amount: BigDecimal, description: String?): DepositTransactionResult {
-        val updated = update(depositId) { it.copy(currentBalance = it.currentBalance + amount, updatedAt = LocalDateTime.now()) }
+        val updated = update(depositId) {
+            require(it.status == DepositStatus.ACTIVE) { "활성 상태에서만 입금 가능합니다" }
+            require(amount > BigDecimal.ZERO) { "입금액은 0보다 커야 합니다" }
+            it.copy(currentBalance = it.currentBalance + amount, updatedAt = LocalDateTime.now())
+        }
         return DepositTransactionResult(nextTransactionId++, depositId, updated.customerId, DepositTransactionType.DEPOSIT,
             amount, updated.currentBalance, description, false, null, null, LocalDateTime.now()).also(contributions::add)
     }

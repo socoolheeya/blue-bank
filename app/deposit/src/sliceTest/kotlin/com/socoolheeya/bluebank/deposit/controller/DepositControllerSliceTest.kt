@@ -29,11 +29,25 @@ private class SliceData : DepositDataService(repo(DepositRepository::class.java)
     override fun createDeposit(command: DepositCommand.Create): DepositResult = DepositResult.from(command.toEntity()).copy(id = next++).also { values[it.id!!] = it }
     override fun getDeposit(depositId: Long) = values[depositId] ?: throw IllegalArgumentException("missing $depositId")
     override fun getDepositsByCustomer(customerId: Long) = values.values.filter { it.customerId == customerId }
-    override fun activateDeposit(depositId: Long) = change(depositId) { it.copy(status = DepositStatus.ACTIVE) }
-    override fun terminateDeposit(depositId: Long) = change(depositId) { it.copy(status = DepositStatus.TERMINATED) }
-    override fun earlyWithdraw(depositId: Long, amount: BigDecimal) = change(depositId) { it.copy(currentBalance = it.currentBalance - amount) }
+    override fun activateDeposit(depositId: Long) = change(depositId) {
+        require(it.status == DepositStatus.PENDING)
+        it.copy(status = DepositStatus.ACTIVE)
+    }
+    override fun terminateDeposit(depositId: Long) = change(depositId) {
+        require(it.status == DepositStatus.ACTIVE)
+        it.copy(status = DepositStatus.TERMINATED)
+    }
+    override fun earlyWithdraw(depositId: Long, amount: BigDecimal) = change(depositId) {
+        require(it.status == DepositStatus.ACTIVE)
+        require(amount > BigDecimal.ZERO && amount <= it.currentBalance)
+        it.copy(currentBalance = it.currentBalance - amount)
+    }
     override fun deposit(depositId: Long, amount: BigDecimal, description: String?): DepositTransactionResult {
-        val value = change(depositId) { it.copy(currentBalance = it.currentBalance + amount) }
+        val value = change(depositId) {
+            require(it.status == DepositStatus.ACTIVE)
+            require(amount > BigDecimal.ZERO)
+            it.copy(currentBalance = it.currentBalance + amount)
+        }
         return DepositTransactionResult(1, depositId, value.customerId, DepositTransactionType.DEPOSIT, amount, value.currentBalance,
             description, false, null, null, LocalDateTime.now())
     }
@@ -48,18 +62,28 @@ private class SliceAccounts : AccountServiceClient {
 
 private val createJson = """{"customerId":7,"accountId":9,"productType":"FREE_SAVINGS","principalAmount":1000.25,"baseRate":3.50,"contractPeriod":12,"periodUnit":"MONTH","startDate":"2026-07-17","maturityDate":"2027-07-17","autoTransferEnabled":false,"autoRenewalEnabled":false,"spareChangeEnabled":false,"aiSavingsEnabled":false,"isTaxFree":false}"""
 
-val depositControllerSlices by testSuite("Deposit controller slices") {
-    val mvc = MockMvcBuilders.standaloneSetup(DepositController(DepositService(SliceData(), SliceAccounts()), "8088", "deposit-1", "deposit"))
+private data class SliceFixture(val data: SliceData, val mvc: org.springframework.test.web.servlet.MockMvc, val json: ObjectMapper)
+private fun fixture(): SliceFixture {
+    val data = SliceData()
+    val mvc = MockMvcBuilders.standaloneSetup(DepositController(DepositService(data, SliceAccounts()), "8088", "deposit-1", "deposit"))
         .setControllerAdvice(GlobalErrorHandler()).build()
-    val json = ObjectMapper().findAndRegisterModules()
+    return SliceFixture(data, mvc, ObjectMapper().findAndRegisterModules())
+}
 
+private fun create(mvc: org.springframework.test.web.servlet.MockMvc) {
+    mvc.perform(post("/api/deposits").contentType(MediaType.APPLICATION_JSON).content(createJson)).andExpect(status().isOk)
+}
+
+val depositControllerSlices by testSuite("Deposit controller slices") {
     test("health and explicit error endpoints expose status and response shape") {
+        val mvc = fixture().mvc
         mvc.perform(get("/api/deposits")).andExpect(status().isOk).andExpect(jsonPath("$.message").value("Deposit Service is running"))
             .andExpect(jsonPath("$.instanceInfo.port").value("8088"))
         mvc.perform(get("/api/deposits/error-test")).andExpect(status().isNotFound).andExpect(jsonPath("$.status").value(404))
     }
 
     test("create lookup and customer list bind decimal dates paths and response shapes") {
+        val mvc = fixture().mvc
         mvc.perform(post("/api/deposits").contentType(MediaType.APPLICATION_JSON).content(createJson))
             .andExpect(status().isOk).andExpect(jsonPath("$.id").value(1)).andExpect(jsonPath("$.currentBalance").value(0))
             .andExpect(jsonPath("$.startDate").value("2026-07-17"))
@@ -68,6 +92,8 @@ val depositControllerSlices by testSuite("Deposit controller slices") {
     }
 
     test("mutation endpoints bind customer query and decimal JSON bodies") {
+        val (data, mvc, json) = fixture()
+        create(mvc)
         mvc.perform(post("/api/deposits/1/activate").param("customerId", "7")).andExpect(jsonPath("$.status").value("활성"))
         mvc.perform(post("/api/deposits/1/deposit").param("customerId", "7").contentType(MediaType.APPLICATION_JSON)
             .content(json.writeValueAsBytes(mapOf("amount" to BigDecimal("50.75"), "description" to "monthly"))))
@@ -75,13 +101,43 @@ val depositControllerSlices by testSuite("Deposit controller slices") {
         mvc.perform(post("/api/deposits/1/withdraw").param("customerId", "7").contentType(MediaType.APPLICATION_JSON).content("{\"amount\":10.25}"))
             .andExpect(status().isOk).andExpect(jsonPath("$.currentBalance").value(40.5))
         mvc.perform(post("/api/deposits/1/terminate").param("customerId", "7")).andExpect(jsonPath("$.status").value("해지"))
+        check(data.getDeposit(1).currentBalance.compareTo(BigDecimal("40.50")) == 0)
     }
 
     test("invalid account ownership missing deposit and missing query parameter are rejected") {
+        val mvc = fixture().mvc
         mvc.perform(post("/api/deposits").contentType(MediaType.APPLICATION_JSON).content(createJson.replace("\"accountId\":9", "\"accountId\":99")))
             .andExpect(status().isBadRequest)
+        create(mvc)
         mvc.perform(post("/api/deposits/1/activate").param("customerId", "8")).andExpect(status().isBadRequest)
         mvc.perform(get("/api/deposits/999")).andExpect(status().isBadRequest)
         mvc.perform(post("/api/deposits/1/activate")).andExpect(status().is5xxServerError)
+    }
+
+    test("invalid lifecycle and signed money requests preserve response state and balance") {
+        val (data, mvc) = fixture()
+        create(mvc)
+        mvc.perform(post("/api/deposits/1/deposit").param("customerId", "7").contentType(MediaType.APPLICATION_JSON).content("{\"amount\":1}"))
+            .andExpect(status().isBadRequest)
+        mvc.perform(post("/api/deposits/1/withdraw").param("customerId", "7").contentType(MediaType.APPLICATION_JSON).content("{\"amount\":1}"))
+            .andExpect(status().isBadRequest)
+        mvc.perform(post("/api/deposits/1/terminate").param("customerId", "7")).andExpect(status().isBadRequest)
+        check(data.getDeposit(1).status == DepositStatus.PENDING && data.getDeposit(1).currentBalance.compareTo(BigDecimal.ZERO) == 0)
+        mvc.perform(post("/api/deposits/1/activate").param("customerId", "7")).andExpect(status().isOk)
+        mvc.perform(post("/api/deposits/1/activate").param("customerId", "7")).andExpect(status().isBadRequest)
+        listOf("0", "-1").forEach { amount ->
+            mvc.perform(post("/api/deposits/1/deposit").param("customerId", "7").contentType(MediaType.APPLICATION_JSON).content("{\"amount\":$amount}"))
+                .andExpect(status().isBadRequest)
+            mvc.perform(post("/api/deposits/1/withdraw").param("customerId", "7").contentType(MediaType.APPLICATION_JSON).content("{\"amount\":$amount}"))
+                .andExpect(status().isBadRequest)
+        }
+        mvc.perform(post("/api/deposits/1/deposit").param("customerId", "7").contentType(MediaType.APPLICATION_JSON).content("{\"amount\":10}"))
+            .andExpect(status().isOk)
+        mvc.perform(post("/api/deposits/1/withdraw").param("customerId", "7").contentType(MediaType.APPLICATION_JSON).content("{\"amount\":11}"))
+            .andExpect(status().isBadRequest)
+        check(data.getDeposit(1).status == DepositStatus.ACTIVE && data.getDeposit(1).currentBalance.compareTo(BigDecimal.TEN) == 0)
+        mvc.perform(post("/api/deposits/1/terminate").param("customerId", "7")).andExpect(status().isOk)
+        mvc.perform(post("/api/deposits/1/terminate").param("customerId", "7")).andExpect(status().isBadRequest)
+        check(data.getDeposit(1).status == DepositStatus.TERMINATED && data.getDeposit(1).currentBalance.compareTo(BigDecimal.TEN) == 0)
     }
 }

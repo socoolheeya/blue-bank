@@ -175,6 +175,7 @@ class Deposit(
      */
     fun deposit(amount: BigDecimal) {
         require(status == DepositStatus.ACTIVE) { "활성 상태에서만 입금 가능합니다" }
+        require(amount > BigDecimal.ZERO) { "입금액은 0보다 커야 합니다" }
         this.currentBalance = currentBalance + amount
         this.totalDepositCount++
         this.updatedAt = LocalDateTime.now()
@@ -185,6 +186,7 @@ class Deposit(
      */
     fun earlyWithdraw(amount: BigDecimal) {
         require(status == DepositStatus.ACTIVE) { "활성 상태에서만 출금 가능합니다" }
+        require(amount > BigDecimal.ZERO) { "출금액은 0보다 커야 합니다" }
         require(earlyWithdrawalCount < maxEarlyWithdrawals) { "중도인출 횟수 초과" }
         require(amount <= currentBalance) { "잔액 부족" }
 
