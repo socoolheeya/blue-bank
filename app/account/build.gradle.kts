@@ -26,9 +26,16 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-restclient")
     testImplementation("de.infix.testBalloon:testBalloon-framework-core:1.0.0-K2.3.20")
+    testImplementation("org.mockito:mockito-core:5.18.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
+    testImplementation("org.springframework:spring-test")
+    testImplementation("com.jayway.jsonpath:json-path:2.9.0")
 
     // H2 Database
     runtimeOnly("com.h2database:h2")
+
+    add("sliceTestImplementation", sourceSets["main"].output)
+    add("integrationTestImplementation", sourceSets["main"].output)
 }
 
 kotlin {
