@@ -10,6 +10,7 @@ private class BalanceScenarioContext {
     val fake = FakeAccountDataServices()
     val service = BalanceService(fake.balanceDataService)
     var balance: Balance? = null
+    var lookupResult: Balance? = null
     var transfer: Pair<Balance, Balance>? = null
     var failure: Throwable? = null
 }
@@ -20,10 +21,11 @@ val balanceServiceScenarios by testSuite("Balance rules") {
             balance = fake.balance(1, "100")
         }
         When("existing and missing balances are requested") {
-            check(service.getBalance(1) === balance)
+            lookupResult = service.getBalance(1)
             failure = runCatching { service.getBalance(2) }.exceptionOrNull()
         }
         Then("the existing balance is returned and the missing lookup fails") {
+            check(lookupResult === balance)
             check(failure is NoSuchElementException)
         }
     }

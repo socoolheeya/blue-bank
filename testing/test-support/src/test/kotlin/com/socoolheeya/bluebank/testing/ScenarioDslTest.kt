@@ -7,6 +7,20 @@ private class RecordingContext {
 }
 
 val scenarioDslContract by testSuite("Scenario DSL contract") {
+    var registrationCompleted = false
+    Scenario(
+        name = "context factory runs during test execution",
+        context = {
+            check(registrationCompleted) { "context was created during suite registration" }
+            RecordingContext()
+        },
+    ) {
+        Then("suite registration has completed before context creation") {
+            check(registrationCompleted)
+        }
+    }
+    registrationCompleted = true
+
     Scenario("steps share one context in declaration order", ::RecordingContext) {
         Given("an empty recording") { check(events.isEmpty()); events += "given" }
         When("an action is recorded") { events += "when" }

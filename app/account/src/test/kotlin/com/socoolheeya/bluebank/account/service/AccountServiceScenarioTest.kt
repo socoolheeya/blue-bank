@@ -12,6 +12,9 @@ private class AccountScenarioContext {
     val fake = FakeAccountDataServices()
     val service = AccountService(fake.accountDataService)
     var result: AccountResult? = null
+    var frozenAccount: AccountResult? = null
+    var activatedAccount: AccountResult? = null
+    var closedAccount: AccountResult? = null
     var accounts: List<AccountResult>? = null
     var failure: Throwable? = null
     var secondFailure: Throwable? = null
@@ -84,10 +87,19 @@ val accountServiceScenarios by testSuite("Account lifecycle") {
         Given("an active account") {
             fake.account(1, "one")
         }
+        When("the account is frozen") {
+            frozenAccount = service.freezeAccount("one", 4, "risk")
+        }
+        When("the account is activated") {
+            activatedAccount = service.activateAccount("one", 4)
+        }
+        When("the account is closed") {
+            closedAccount = service.closeAccount("one", 4, "done")
+        }
         Then("freeze activate and close mutate account state") {
-            check(service.freezeAccount("one", 4, "risk").status == AccountEnums.AccountStatus.FROZEN)
-            check(service.activateAccount("one", 4).status == AccountEnums.AccountStatus.ACTIVE)
-            check(service.closeAccount("one", 4, "done").status == AccountEnums.AccountStatus.CLOSED)
+            check(frozenAccount!!.status == AccountEnums.AccountStatus.FROZEN)
+            check(activatedAccount!!.status == AccountEnums.AccountStatus.ACTIVE)
+            check(closedAccount!!.status == AccountEnums.AccountStatus.CLOSED)
             check(fake.accounts[1]!!.closedAt != null)
         }
     }
