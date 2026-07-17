@@ -16,6 +16,8 @@ val accountTests by testSuite {
 
 TestBalloon 테스트는 top-level delegated `testSuite`로 등록하고, 중첩 suite로 시나리오를 표현한다. 가변 상태는 test-level fixture에서 만들고, 공유 가능한 고비용 읽기 전용 자원만 suite-level fixture로 공유한다.
 
+테스트 이름은 구현 메서드명이 아니라 검증하는 행위와 결과를 설명한다. public controller/service 연산을 추가하거나 변경할 때는 같은 변경에서 [계층별 테스트 가이드](layered-test-guide.md)의 API 인벤토리를 확인하고 가장 작은 소유 계층에 성공·실패 경계 테스트를 둔다.
+
 ## TestBalloon만 사용하는 테스트
 
 다음 범주에는 JUnit Jupiter를 사용하지 않는다.
@@ -49,6 +51,26 @@ TestBalloon 테스트는 top-level delegated `testSuite`로 등록하고, 중첩
 - TestBalloon과 JUnit을 같은 모듈에서 사용할 때는 두 엔진을 모두 Gradle test task에서 발견할 수 있게 유지하고, 특정 엔진만 실행하는 전역 필터를 추가하지 않는다.
 - Wrapper 파일은 루트 wrapper 통합 세션이 소유한다. 이 표준 변경에서는 wrapper를 수정하지 않는다.
 
+## 실행과 유효성 규칙
+
+- `test`: 도메인, 변환기, 서비스 시나리오처럼 Spring/실제 저장소가 필요 없는 빠른 테스트를 실행한다.
+- `sliceTest`: controller HTTP binding, JSON, validation, exception mapping을 제한된 Spring MVC 경계에서 실행한다.
+- `integrationTest`: 실제 Spring context와 H2 repository/transaction 경계를 실행한다.
+- `check`: 해당 모듈의 세 계층(`test`, `sliceTest`, `integrationTest`)을 검증 lifecycle로 실행한다.
+- `build`: compile, package, `check`를 포함하는 최종 모듈/루트 lifecycle이다.
+
+검증 대상으로 선언한 모든 task는 XML 결과에서 **0보다 큰 test count**를 보고해야 한다. `NO-SOURCE`, 0 tests, 필터로 인한 전부 제외는 성공으로 간주하지 않는다. failures와 errors는 0이어야 하며, 의도하지 않은 skipped test도 0이어야 한다. 특정 계층을 소유하지 않는 모듈의 0건 결과는 루트 집계에서 성공한 계층으로 세지 말고, 그 계층을 소유한 모듈 task를 명시적으로 확인한다.
+
+필터링은 가장 작은 소유 task와 fully-qualified suite/class 이름을 사용한다. 필터가 TestBalloon의 동적 test 발견을 제거하지 않는지 XML test count로 확인한다.
+
+```bash
+./gradlew :app:account:test --tests '*accountServiceScenarios*' --console=plain
+./gradlew :app:account:sliceTest --tests '*accountControllerSlices*' --console=plain
+./gradlew :data:account-data:integrationTest --tests '*accountDataIntegration*' --console=plain
+```
+
+TestBalloon의 filter identity는 Kotlin 파일명이 아니라 delegated suite property에서 생성된다(예: `suite_com.socoolheeya.bluebank.account.service.accountServiceScenarios`). 먼저 필터 없이 owning task를 실행해 `TEST-suite_*.xml` identity를 확인하고, 그 property 이름을 `--tests` wildcard에 사용한다. 위 세 예제는 실제 실행과 XML의 10/5/4 tests로 검증되었다.
+
 ## 리뷰 체크리스트
 
 1. 테스트가 순수 로직·서비스·변환·직렬화·코루틴·파라미터화라면 TestBalloon DSL만 사용했는가?
@@ -56,3 +78,4 @@ TestBalloon 테스트는 top-level delegated `testSuite`로 등록하고, 중첩
 3. TestBalloon blue code에서 가변 상태를 green code로 누출하지 않는가?
 4. Spring context, DB, batch 자원은 fixture 또는 JUnit 인프라 생명주기로 정리되는가?
 5. 새 테스트가 가장 빠른 실행 계층에 배치되어 있는가?
+6. 실행한 각 계층의 XML 결과가 0보다 큰 tests와 0 failures/errors/unintended skips를 보고하는가?

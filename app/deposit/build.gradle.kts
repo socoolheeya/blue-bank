@@ -34,6 +34,13 @@ dependencies {
     // H2 for testing
     runtimeOnly("com.h2database:h2")
     testImplementation("de.infix.testBalloon:testBalloon-framework-core:1.0.0-K2.3.20")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation(project(":testing:test-support"))
+}
+
+sourceSets.named("sliceTest") {
+    compileClasspath += sourceSets.main.get().output
+    runtimeClasspath += sourceSets.main.get().output
 }
 
 kotlin {

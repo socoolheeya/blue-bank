@@ -10,6 +10,8 @@ import java.time.LocalDateTime
 
 @Repository
 interface LedgerEntryRepository : JpaRepository<LedgerEntry, Long> {
+    fun findByOccurredAtBetween(start: LocalDateTime, end: LocalDateTime): List<LedgerEntry>
+    fun findByAccountIdAndOccurredAtBetween(accountId: Long, start: LocalDateTime, end: LocalDateTime): List<LedgerEntry>
     fun findByAccountId(accountId: Long, pageable: Pageable): Page<LedgerEntry>
     fun findByAccountIdAndOccurredAtBetween(accountId: Long, start: LocalDateTime, end: LocalDateTime, pageable: Pageable): Page<LedgerEntry>
     fun findByAccountIdAndType(accountId: Long, type: AccountEnums.EntryType, pageable: Pageable): Page<LedgerEntry>

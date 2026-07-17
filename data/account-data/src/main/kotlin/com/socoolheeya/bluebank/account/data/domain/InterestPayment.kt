@@ -4,6 +4,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Table
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -12,7 +13,8 @@ import java.time.LocalDateTime
  * 이자 지급 내역
  * 계좌에 지급된 이자 기록
  */
-@Entity
+@Entity(name = "AccountInterestPayment")
+@Table(name = "account_interest_payment")
 class InterestPayment(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,

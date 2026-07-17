@@ -65,5 +65,38 @@ subprojects {
             classpath = testBalloonRuntime
             useJUnitPlatform()
         }
+
+        val sliceTest = sourceSets.create("sliceTest")
+        val integrationTest = sourceSets.create("integrationTest")
+
+        configurations[sliceTest.implementationConfigurationName]
+            .extendsFrom(configurations["testImplementation"])
+        configurations[sliceTest.runtimeOnlyConfigurationName]
+            .extendsFrom(configurations["testRuntimeOnly"])
+        configurations[integrationTest.implementationConfigurationName]
+            .extendsFrom(configurations["testImplementation"])
+        configurations[integrationTest.runtimeOnlyConfigurationName]
+            .extendsFrom(configurations["testRuntimeOnly"])
+
+        val sliceTestTask = tasks.register<Test>("sliceTest") {
+            description = "Runs slice tests with an isolated JUnit Platform 1.13 runtime"
+            group = "verification"
+            testClassesDirs = sliceTest.output.classesDirs
+            classpath = files(sliceTest.output, testBalloonRuntime)
+            useJUnitPlatform()
+            mustRunAfter(tasks.named("test"))
+        }
+        val integrationTestTask = tasks.register<Test>("integrationTest") {
+            description = "Runs integration tests with an isolated JUnit Platform 1.13 runtime"
+            group = "verification"
+            testClassesDirs = integrationTest.output.classesDirs
+            classpath = files(integrationTest.output, testBalloonRuntime)
+            useJUnitPlatform()
+            mustRunAfter(sliceTestTask)
+        }
+
+        tasks.named("check") {
+            dependsOn(sliceTestTask, integrationTestTask)
+        }
     }
 }
