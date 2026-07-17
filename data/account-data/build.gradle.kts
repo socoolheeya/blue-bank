@@ -4,6 +4,7 @@ plugins {
     kotlin("plugin.jpa")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
+    id("de.infix.testBalloon")
 }
 
 description = "account-data"
@@ -23,9 +24,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("de.infix.testBalloon:testBalloon-framework-core:1.0.0-K2.3.20")
     testRuntimeOnly("com.h2database:h2")
 }
 
@@ -47,9 +46,6 @@ kotlin {
     }
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
 
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
     enabled = false

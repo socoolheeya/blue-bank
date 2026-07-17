@@ -6,6 +6,7 @@ plugins {
     kotlin("plugin.jpa")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
+    id("de.infix.testBalloon")
 }
 
 description = "loan-data"
@@ -27,10 +28,7 @@ dependencies {
 
     // H2 for testing
     runtimeOnly("com.h2database:h2")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("de.infix.testBalloon:testBalloon-framework-core:1.0.0-K2.3.20")
 }
 
 kotlin {
@@ -39,9 +37,6 @@ kotlin {
     }
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
-}
 
 tasks.named<BootJar>("bootJar") {
     enabled = false

@@ -1,19 +1,18 @@
-package com.socoolheeya.batch
+package com.socoolheeya.bluebank.account
 
 import de.infix.testBalloon.framework.core.testSuite
+import org.springframework.beans.factory.getBean
 import org.springframework.boot.WebApplicationType
 import org.springframework.boot.builder.SpringApplicationBuilder
 
-val batchApplicationSuite by testSuite("Batch application") {
+val accountApplicationSuite by testSuite("Account application") {
     test("starts with representative application bean") {
-        val context = SpringApplicationBuilder(BatchApplication::class.java)
+        val context = SpringApplicationBuilder(AccountApplication::class.java)
             .web(WebApplicationType.NONE)
             .properties("eureka.client.enabled=false", "spring.cloud.discovery.enabled=false")
             .run()
-        try {
-            context.getBean(BatchApplication::class.java)
-        } finally {
-            context.close()
+        context.use { context ->
+            context.getBean<AccountApplication>()
         }
     }
 }

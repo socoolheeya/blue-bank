@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.spring")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
+    id("de.infix.testBalloon")
 }
 
 description = "batch"
@@ -19,18 +20,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-batch")
     implementation("org.springframework.boot:spring-boot-starter-batch-jdbc")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    testImplementation("org.springframework.boot:spring-boot-starter-batch-jdbc-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-batch-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("de.infix.testBalloon:testBalloon-framework-core:1.0.0-K2.3.20")
 }
 
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
     }
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }

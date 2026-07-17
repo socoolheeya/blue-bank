@@ -1,13 +1,10 @@
 package com.socoolheeya.bluebank.card.data
 
-import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
+import de.infix.testBalloon.framework.core.testSuite
+import com.socoolheeya.bluebank.card.data.domain.CardEnums
 
-@SpringBootTest
-class CardDataApplicationTests {
-
-    @Test
-    fun contextLoads() {
+val cardDataApplicationSuite by testSuite {
+    test("card data module smoke test") {
+        check(CardEnums.CardType.entries.isNotEmpty())
     }
-
 }

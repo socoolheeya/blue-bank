@@ -1,13 +1,10 @@
 package com.socoolheeya.bluebank.deposit.data
 
-import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
+import de.infix.testBalloon.framework.core.testSuite
+import com.socoolheeya.bluebank.deposit.data.domain.DepositEnums
 
-@SpringBootTest
-class DepositDataApplicationTests {
-
-    @Test
-    fun contextLoads() {
+val depositDataApplicationSuite by testSuite {
+    test("deposit data module smoke test") {
+        check(DepositEnums.DepositStatus.entries.isNotEmpty())
     }
-
 }

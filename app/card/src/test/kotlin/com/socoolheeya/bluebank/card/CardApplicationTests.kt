@@ -1,13 +1,19 @@
 package com.socoolheeya.bluebank.card
 
-import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
+import de.infix.testBalloon.framework.core.testSuite
+import org.springframework.boot.WebApplicationType
+import org.springframework.boot.builder.SpringApplicationBuilder
 
-@SpringBootTest
-class CardApplicationTests {
-
-    @Test
-    fun contextLoads() {
+val cardApplicationSuite by testSuite("Card application") {
+    test("starts with representative application bean") {
+        val context = SpringApplicationBuilder(CardApplication::class.java)
+            .web(WebApplicationType.NONE)
+            .properties("eureka.client.enabled=false", "spring.cloud.discovery.enabled=false")
+            .run()
+        try {
+            context.getBean(CardApplication::class.java)
+        } finally {
+            context.close()
+        }
     }
-
 }

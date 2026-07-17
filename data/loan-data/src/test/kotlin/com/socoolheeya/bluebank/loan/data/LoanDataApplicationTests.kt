@@ -1,13 +1,10 @@
 package com.socoolheeya.bluebank.loan.data
 
-import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
+import de.infix.testBalloon.framework.core.testSuite
+import com.socoolheeya.bluebank.loan.data.domain.LoanEnums
 
-@SpringBootTest
-class LoanDataApplicationTests {
-
-    @Test
-    fun contextLoads() {
+val loanDataApplicationSuite by testSuite {
+    test("loan data module smoke test") {
+        check(LoanEnums.LoanType.entries.isNotEmpty())
     }
-
 }

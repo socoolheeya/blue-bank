@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.spring")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
+    id("de.infix.testBalloon")
 }
 
 val springCloudVersion by extra("2025.1.2")
@@ -28,10 +29,7 @@ dependencies {
 
     // H2 for testing
     runtimeOnly("com.h2database:h2")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("de.infix.testBalloon:testBalloon-framework-core:1.0.0-K2.3.20")
 }
 
 dependencyManagement {
@@ -44,8 +42,4 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
     }
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }

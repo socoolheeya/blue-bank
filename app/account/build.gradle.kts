@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.spring")
     id("org.springframework.boot")
     id("io.spring.dependency-management")
+    id("de.infix.testBalloon")
 }
 val springCloudVersion by extra("2025.1.2")
 
@@ -24,9 +25,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-restclient")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("de.infix.testBalloon:testBalloon-framework-core:1.0.0-K2.3.20")
 
     // H2 Database
     runtimeOnly("com.h2database:h2")
@@ -41,8 +40,4 @@ dependencyManagement {
     imports {
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
     }
-}
-
-tasks.withType<Test> {
-    useJUnitPlatform()
 }
