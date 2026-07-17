@@ -9,7 +9,9 @@ import java.time.YearMonth
 val interestServiceScenarios by testSuite("Interest calculations") {
     test("monthly calculation returns the data service payment") {
         val fake = FakeAccountDataServices(); val expected = fake.payment(1, 7, "11", LocalDate.of(2026, 1, 1))
-        check(InterestService(fake.interestDataService).calculateAndPayMonthlyInterest(7, YearMonth.of(2026, 1)) === expected)
+        val month = YearMonth.of(2026, 1)
+        check(InterestService(fake.interestDataService).calculateAndPayMonthlyInterest(7, month) === expected)
+        check(fake.lastMonthlyInterestRequest == 7L to month)
     }
     test("average calculation preserves its period") {
         val fake = FakeAccountDataServices(); val service = InterestService(fake.interestDataService)

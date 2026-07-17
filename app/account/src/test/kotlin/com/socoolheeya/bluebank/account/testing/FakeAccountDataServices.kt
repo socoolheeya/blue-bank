@@ -26,6 +26,7 @@ class FakeAccountDataServices {
     var lastAveragePeriod: Triple<Long, LocalDate, LocalDate>? = null
     var lastHistoryPeriod: Triple<Long, LocalDate, LocalDate>? = null
     var lastExpectedMonths: Int? = null
+    var lastMonthlyInterestRequest: Pair<Long, YearMonth>? = null
 
     val accountDataService: AccountDataService = mock(AccountDataService::class.java)
     val balanceDataService: BalanceDataService = mock(BalanceDataService::class.java)
@@ -75,7 +76,11 @@ class FakeAccountDataServices {
             balances.getValue(id).also { it.withdraw(amount) }
         }.`when`(balanceDataService).withdraw(any(), any(), anyOrNull(), anyOrNull(), anyOrNull())
 
-        doAnswer { invocation -> interestPayments.firstOrNull { it.accountId == invocation.getArgument<Long>(0) } }
+        doAnswer { invocation ->
+            val accountId = invocation.getArgument<Long>(0)
+            lastMonthlyInterestRequest = accountId to invocation.getArgument(1)
+            interestPayments.firstOrNull { it.accountId == accountId }
+        }
             .`when`(interestDataService).calculateAndPayMonthlyInterest(any(), any())
         doAnswer { invocation ->
             lastAveragePeriod = Triple(invocation.getArgument(0), invocation.getArgument(1), invocation.getArgument(2))
