@@ -13,7 +13,7 @@ java {
 
 dependencies {
     api("org.springframework.boot:spring-boot-starter")
-    testImplementation("de.infix.testBalloon:testBalloon-framework-core:1.0.0-K2.3.20")
+    api("de.infix.testBalloon:testBalloon-framework-core:1.0.0-K2.3.20")
 }
 
 tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
