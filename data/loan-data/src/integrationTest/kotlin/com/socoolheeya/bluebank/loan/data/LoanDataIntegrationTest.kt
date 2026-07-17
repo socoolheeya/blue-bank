@@ -44,9 +44,10 @@ val loanDataIntegration by testSuite("Loan data integration", compartment = { Te
             check(service.getApplicationsByCustomerId(42).single().id == first.id)
             val approved = service.approveApplication(first.id!!, BigDecimal("900000.12"), BigDecimal("4.321"), loan("LN-approved"))
             check(approved.status == LoanEnums.ApplicationStatus.APPROVED && approved.loanId != null)
-            check(context.getBean(LoanRepository::class.java).findById(approved.loanId!!).get().principalAmount.compareTo(BigDecimal("900000.12")) != 0)
-            // The command is authoritative: verify its exact amount is persisted.
-            check(context.getBean(LoanRepository::class.java).findById(approved.loanId!!).get().principalAmount.compareTo(BigDecimal("1000.50")) == 0)
+            val createdLoan = context.getBean(LoanRepository::class.java).findById(approved.loanId!!).orElseThrow()
+            check(createdLoan.principalAmount == BigDecimal("900000.12"))
+            check(createdLoan.outstandingBalance == BigDecimal("900000.12"))
+            check(createdLoan.interestRate == BigDecimal("4.321"))
             val second = service.submitApplication(application(77))
             check(service.rejectApplication(second.id!!, "policy").rejectionReason == "policy")
             check(service.getApplication(999999) == null)

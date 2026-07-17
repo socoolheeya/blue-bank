@@ -29,11 +29,16 @@ class LoanApplicationDataService(
         approvedRate: BigDecimal,
         loanCommand: LoanCommand.Create
     ): LoanApplicationResult {
+        require(approvedAmount > BigDecimal.ZERO) { "승인 금액은 0보다 커야 합니다" }
+        require(approvedRate > BigDecimal.ZERO) { "승인 금리는 0보다 커야 합니다" }
         val application = loanApplicationRepository.findById(applicationId)
             .orElseThrow { NoSuchElementException("신청서를 찾을 수 없습니다: $applicationId") }
 
         // 1. Loan 생성
-        val loan = loanCommand.toEntity()
+        val loan = loanCommand.copy(
+            principalAmount = approvedAmount,
+            interestRate = approvedRate
+        ).toEntity()
         val savedLoan = loanRepository.save(loan)
 
         // 2. Application 승인 처리

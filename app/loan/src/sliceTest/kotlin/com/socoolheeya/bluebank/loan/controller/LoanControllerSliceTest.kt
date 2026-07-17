@@ -89,7 +89,13 @@ val loanControllerSlices by testSuite("Loan controller slices") {
         LoanMvcFixture().use { f ->
             f.mvc.post("/api/loans/1/repay") { contentType = org.springframework.http.MediaType.APPLICATION_JSON; content = "{}" }.andExpect { status { isBadRequest() } }
             whenever(f.loans.getLoan(404)).thenThrow(NoSuchElementException("missing"))
-            f.mvc.get("/api/loans/404").andExpect { status { is5xxServerError() }; jsonPath("$.message") { value("An unexpected error occurred") } }
+            f.mvc.get("/api/loans/404").andExpect {
+                status { isNotFound() }
+                jsonPath("$.status") { value(404) }
+                jsonPath("$.error") { value("Not Found") }
+                jsonPath("$.message") { value("missing") }
+                jsonPath("$.path") { value("/api/loans/404") }
+            }
         }
     }
 }

@@ -17,6 +17,7 @@ import com.socoolheeya.bluebank.card.data.domain.entity.CardStatement
 import com.socoolheeya.bluebank.card.data.domain.entity.CardTransaction
 import com.socoolheeya.bluebank.card.data.domain.entity.CashbackHistory
 import com.socoolheeya.bluebank.card.data.repository.*
+import de.infix.testBalloon.framework.core.TestCompartment
 import de.infix.testBalloon.framework.core.testSuite
 import org.springframework.boot.WebApplicationType
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -27,11 +28,20 @@ import java.time.LocalDate
 @SpringBootApplication(scanBasePackages = ["com.socoolheeya.bluebank.card.data"])
 private class CardDataIntegrationConfiguration
 
-private val context by lazy {
+private inline fun withCardContext(block: (org.springframework.context.ConfigurableApplicationContext) -> Unit) {
     SpringApplicationBuilder(CardDataIntegrationConfiguration::class.java)
         .web(WebApplicationType.NONE)
         .profiles("integration")
         .run()
+        .use { context ->
+            context.getBean(CashbackHistoryRepository::class.java).deleteAll()
+            context.getBean(CardTransactionRepository::class.java).deleteAll()
+            context.getBean(CardStatementRepository::class.java).deleteAll()
+            context.getBean(CardBenefitRepository::class.java).deleteAll()
+            context.getBean(CardApplicationRepository::class.java).deleteAll()
+            context.getBean(CardRepository::class.java).deleteAll()
+            block(context)
+        }
 }
 
 private fun create(number: String, customer: Long = 7) = CardCommand.Create(
@@ -40,18 +50,9 @@ private fun create(number: String, customer: Long = 7) = CardCommand.Create(
     BigDecimal("5000000"), BigDecimal("20000000"), "BLUE"
 )
 
-private fun cleanDatabase() {
-    context.getBean(CashbackHistoryRepository::class.java).deleteAll()
-    context.getBean(CardTransactionRepository::class.java).deleteAll()
-    context.getBean(CardStatementRepository::class.java).deleteAll()
-    context.getBean(CardBenefitRepository::class.java).deleteAll()
-    context.getBean(CardApplicationRepository::class.java).deleteAll()
-    context.getBean(CardRepository::class.java).deleteAll()
-}
-
-val cardDataIntegrationTests by testSuite("Card data H2 integration") {
+val cardDataIntegrationTests by testSuite("Card data H2 integration", compartment = { TestCompartment.Sequential }) {
     test("card persistence queries and lifecycle transitions use real repositories") {
-        cleanDatabase()
+        withCardContext { context ->
         val service = context.getBean(CardDataService::class.java)
         val first = service.createCard(create("5234000011110001"))
         val firstId = requireNotNull(first.id)
@@ -64,10 +65,11 @@ val cardDataIntegrationTests by testSuite("Card data H2 integration") {
         check(!service.toggleCardUsage(CardCommand.ToggleUsage(firstId, false)).isEnabled)
         check(service.reportLostCard(firstId).status == CardStatus.LOST)
         check(service.terminateCard(CardCommand.Terminate(firstId)).status == CardStatus.TERMINATED)
+        }
     }
 
-    test("application persistence review rejection and lookup use real repositories") {
-        cleanDatabase()
+    test("application approval and issuance transitions persist the created card relationship") {
+        withCardContext { context ->
         val service = context.getBean(CardApplicationDataService::class.java)
         val submitted = service.submitApplication(CardApplicationCommand.Submit(
             27, 29, CardType.DEBIT, CardProductType.FRIENDS_CHECK, "LEE", "000", "010", address = "Seoul", designCode = "BLUE"
@@ -76,12 +78,22 @@ val cardDataIntegrationTests by testSuite("Card data H2 integration") {
         check(service.getApplication(submittedId) != null)
         check(service.getApplicationsByCustomerId(27).map { it.id } == listOf(submittedId))
         check(service.startReview(submittedId).status.name == "UNDER_REVIEW")
-        check(service.rejectApplication(submittedId, "policy").rejectionReason == "policy")
+        val approved = service.approveApplication(submittedId, BigDecimal("700000.00"), create("5234000011110027", 27))
+        val cardId = requireNotNull(approved.cardId)
+        check(approved.status.name == "APPROVED")
+        check(approved.approvedCreditLimit == BigDecimal("700000.00"))
+        check(context.getBean(CardRepository::class.java).findById(cardId).orElseThrow().customerId == 27L)
+        val issued = service.markAsIssued(submittedId, cardId)
+        check(issued.status.name == "ISSUED")
+        val persisted = context.getBean(CardApplicationRepository::class.java).findById(submittedId).orElseThrow()
+        check(persisted.status.name == "ISSUED")
+        check(persisted.cardId == cardId)
         check(service.getApplication(Long.MAX_VALUE) == null)
+        }
     }
 
     test("transaction statement benefit and cashback repositories persist and query real H2 rows") {
-        cleanDatabase()
+        withCardContext { context ->
         val transactions = context.getBean(CardTransactionRepository::class.java)
         val statements = context.getBean(CardStatementRepository::class.java)
         val benefits = context.getBean(CardBenefitRepository::class.java)
@@ -117,5 +129,6 @@ val cardDataIntegrationTests by testSuite("Card data H2 integration") {
         ))
         check(cashbacks.findByTransactionId(requireNotNull(transaction.id)).single().id == cashback.id)
         check(cashbacks.countByCardIdAndEarnedDate(41, today) == 1)
+        }
     }
 }

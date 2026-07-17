@@ -16,6 +16,24 @@ class GlobalErrorHandler {
 
     private val logger = LoggerFactory.getLogger(GlobalErrorHandler::class.java)
 
+    @ExceptionHandler(NoSuchElementException::class)
+    fun handleNoSuchElementException(
+        ex: NoSuchElementException,
+        request: WebRequest
+    ): ResponseEntity<ErrorResponse> {
+        logger.error("Resource not found: ${ex.message}")
+
+        val errorResponse = ErrorResponse(
+            timestamp = LocalDateTime.now(),
+            status = HttpStatus.NOT_FOUND.value(),
+            error = HttpStatus.NOT_FOUND.reasonPhrase,
+            message = ex.message ?: "Resource not found",
+            path = request.getDescription(false).replace("uri=", "")
+        )
+
+        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+    }
+
     @ExceptionHandler(LoanNotFoundException::class)
     fun handleLoanNotFoundException(
         ex: LoanNotFoundException,
