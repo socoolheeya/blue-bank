@@ -56,15 +56,16 @@ private class SliceApplications : CardApplicationDataService(repo(CardApplicatio
     }
 }
 
+private fun sliceMvc(cards: SliceCards, applications: SliceApplications) = MockMvcBuilders.standaloneSetup(
+    CardController(CardService(cards)), CardApplicationController(CardApplicationService(applications, cards))
+).setControllerAdvice(GlobalErrorHandler()).build()
+
 val cardControllerSlices by testSuite("Card controller slices") {
-    val cards = SliceCards()
-    val applications = SliceApplications()
-    val mvc = MockMvcBuilders.standaloneSetup(
-        CardController(CardService(cards)), CardApplicationController(CardApplicationService(applications, cards))
-    ).setControllerAdvice(GlobalErrorHandler()).build()
     val json = ObjectMapper().findAndRegisterModules()
 
     test("card endpoints bind paths queries and bodies") {
+        val cards = SliceCards()
+        val mvc = sliceMvc(cards, SliceApplications())
         mvc.perform(get("/api/cards")).andExpect(status().isOk).andExpect(content().string("Card Service is running"))
         mvc.perform(get("/api/cards/1")).andExpect(status().isOk).andExpect(jsonPath("$.id").value(1))
         mvc.perform(get("/api/cards/customer/7")).andExpect(jsonPath("$[0].customerId").value(7))
@@ -78,6 +79,9 @@ val cardControllerSlices by testSuite("Card controller slices") {
     }
 
     test("application endpoints bind request and list shapes") {
+        val cards = SliceCards()
+        val applications = SliceApplications()
+        val mvc = sliceMvc(cards, applications)
         val request = CardApplicationDto.Request(7, 9, CardType.DEBIT, CardProductType.FRIENDS_CHECK, "KIM", "000", "010", address = "Seoul", designCode = "BLUE")
         mvc.perform(post("/api/cards/applications").contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsBytes(request)))
             .andExpect(status().isOk).andExpect(jsonPath("$.id").value(2))

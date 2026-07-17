@@ -64,10 +64,12 @@ TestBalloon 테스트는 top-level delegated `testSuite`로 등록하고, 중첩
 필터링은 가장 작은 소유 task와 fully-qualified suite/class 이름을 사용한다. 필터가 TestBalloon의 동적 test 발견을 제거하지 않는지 XML test count로 확인한다.
 
 ```bash
-./gradlew :app:account:test --tests '*AccountServiceScenarioTest*' --console=plain
-./gradlew :app:account:sliceTest --tests '*AccountControllerSliceTest*' --console=plain
-./gradlew :data:account-data:integrationTest --tests '*AccountDataIntegrationTest*' --console=plain
+./gradlew :app:account:test --tests '*accountServiceScenarios*' --console=plain
+./gradlew :app:account:sliceTest --tests '*accountControllerSlices*' --console=plain
+./gradlew :data:account-data:integrationTest --tests '*accountDataIntegration*' --console=plain
 ```
+
+TestBalloon의 filter identity는 Kotlin 파일명이 아니라 delegated suite property에서 생성된다(예: `suite_com.socoolheeya.bluebank.account.service.accountServiceScenarios`). 먼저 필터 없이 owning task를 실행해 `TEST-suite_*.xml` identity를 확인하고, 그 property 이름을 `--tests` wildcard에 사용한다. 위 세 예제는 실제 실행과 XML의 10/5/4 tests로 검증되었다.
 
 ## 리뷰 체크리스트
 
