@@ -41,23 +41,28 @@ allprojects {
 subprojects {
     plugins.withId("org.jetbrains.kotlin.jvm") {
         val sourceSets = extensions.getByType<SourceSetContainer>()
+        val bootRuntime = configurations.named("testRuntimeClasspath")
+        val testBalloonRuntime = files(
+            sourceSets["main"].output,
+            sourceSets["test"].output,
+            bootRuntime.map { configuration ->
+                configuration.filterNot { file ->
+                    file.name.startsWith("junit-platform-") ||
+                        file.name.startsWith("junit-jupiter-") ||
+                        file.name.startsWith("junit-bom-")
+                }
+            },
+            rootProject.configurations[testBalloonPlatform.name]
+        )
+        tasks.named<Test>("test") {
+            classpath = testBalloonRuntime
+            useJUnitPlatform()
+        }
         tasks.register<Test>("testBalloon") {
             description = "Runs TestBalloon tests with an isolated JUnit Platform 1.13 runtime"
             group = "verification"
             testClassesDirs = sourceSets["test"].output.classesDirs
-            val bootRuntime = configurations.named("testRuntimeClasspath")
-            classpath = files(
-                sourceSets["main"].output,
-                sourceSets["test"].output,
-                bootRuntime.map { configuration ->
-                    configuration.filterNot { file ->
-                        file.name.startsWith("junit-platform-") ||
-                            file.name.startsWith("junit-jupiter-") ||
-                            file.name.startsWith("junit-bom-")
-                    }
-                },
-                rootProject.configurations[testBalloonPlatform.name]
-            )
+            classpath = testBalloonRuntime
             useJUnitPlatform()
         }
     }
