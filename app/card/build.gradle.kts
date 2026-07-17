@@ -4,13 +4,13 @@ plugins {
     id("org.springframework.boot")
     id("io.spring.dependency-management")
 }
-val springCloudVersion by extra("2025.1.0")
+val springCloudVersion by extra("2025.1.2")
 
 description = "card"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -31,6 +31,10 @@ dependencies {
 
     // H2 for testing
     runtimeOnly("com.h2database:h2")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 kotlin {
@@ -47,4 +51,3 @@ dependencyManagement {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
-

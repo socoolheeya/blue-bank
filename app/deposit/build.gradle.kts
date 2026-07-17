@@ -4,13 +4,13 @@ plugins {
     id("org.springframework.boot")
     id("io.spring.dependency-management")
 }
-val springCloudVersion by extra("2025.1.0")
+val springCloudVersion by extra("2025.1.2")
 
 description = "deposit"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 

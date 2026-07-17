@@ -72,17 +72,24 @@ sealed interface DepositCommand {
         }
     }
 
+    //
     data class Activate(val depositId: Long) : DepositCommand
 
+    // 입금
     data class MakeDeposit(val depositId: Long, val amount: BigDecimal, val description: String? = null) : DepositCommand
 
+    // 중도 출금
     data class EarlyWithdraw(val depositId: Long, val amount: BigDecimal) : DepositCommand
 
+    // 해지
     data class Terminate(val depositId: Long) : DepositCommand
 
+    // 만기처리
     data class Mature(val depositId: Long, val totalInterest: BigDecimal) : DepositCommand
 
+    // 이자 지급
     data class PayInterest(val depositId: Long, val interest: BigDecimal) : DepositCommand
 
+    // 우대금리 변경
     data class UpdateBonusRate(val depositId: Long, val bonusRate: BigDecimal) : DepositCommand
 }

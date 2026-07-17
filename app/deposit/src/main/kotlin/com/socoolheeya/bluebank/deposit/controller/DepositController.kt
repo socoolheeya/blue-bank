@@ -29,12 +29,8 @@ class DepositController(
             )
         )
 
-        // 응답 헤더에도 인스턴스 정보 추가
-        return ResponseEntity.ok()
-            .header("X-Instance-Port", serverPort)
-            .header("X-Instance-Id", instanceId)
-            .header("X-Service-Name", appName)
-            .body(responseBody)
+        // 헤더는 이제 GlobalResponseHeaderAdvice에서 자동으로 추가됩니다
+        return ResponseEntity.ok(responseBody)
     }
 
     @GetMapping("/error-test")

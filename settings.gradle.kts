@@ -5,6 +5,7 @@ include("app:account")
 include("app:deposit")
 include("app:loan")
 include("app:card")
+include("app:batch")
 
 // Data Modules
 include("data:account-data")
