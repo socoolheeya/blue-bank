@@ -43,4 +43,12 @@ val cardServiceScenarios by testSuite("Card service scenarios") {
             { service.reportLostCard(1, 8) }, { service.terminateCard(1, 8) }
         ).forEach { check(runCatching(it).exceptionOrNull() is IllegalArgumentException) }
     }
+
+    test("every lifecycle mutation rejects a missing card") {
+        val service = CardService(FakeCardDataService())
+        listOf<() -> Unit>(
+            { service.activateCard(99, 7) }, { service.toggleCardUsage(99, 7, false) },
+            { service.reportLostCard(99, 7) }, { service.terminateCard(99, 7) }
+        ).forEach { check(runCatching(it).exceptionOrNull() is NoSuchElementException) }
+    }
 }

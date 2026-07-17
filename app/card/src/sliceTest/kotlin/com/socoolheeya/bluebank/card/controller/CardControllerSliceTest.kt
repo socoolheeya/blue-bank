@@ -38,14 +38,22 @@ private class SliceCards : CardDataService(repo(CardRepository::class.java)) {
     override fun toggleCardUsage(command: com.socoolheeya.bluebank.card.data.domain.command.CardCommand.ToggleUsage) = cardResult.copy(isEnabled = command.enabled)
     override fun reportLostCard(cardId: Long) = cardResult.copy(status = CardStatus.LOST)
     override fun terminateCard(command: com.socoolheeya.bluebank.card.data.domain.command.CardCommand.Terminate) = cardResult.copy(status = CardStatus.TERMINATED)
+    override fun createCard(command: com.socoolheeya.bluebank.card.data.domain.command.CardCommand.Create) =
+        cardResult.copy(id = 10L, cardNumber = command.cardNumber, cardNumberMasked = command.cardNumberMasked)
 }
 private class SliceApplications : CardApplicationDataService(repo(CardApplicationRepository::class.java), repo(CardRepository::class.java)) {
-    private val result = CardApplicationResult(2, 7, 9, CardType.DEBIT, CardProductType.FRIENDS_CHECK, "KIM", "010", null,
+    private var result = CardApplicationResult(2, 7, 9, CardType.DEBIT, CardProductType.FRIENDS_CHECK, "KIM", "010", null,
         "BLUE", null, false, com.socoolheeya.bluebank.card.data.domain.CardEnums.CardApplicationStatus.SUBMITTED,
         null, null, null, LocalDateTime.now(), null)
     override fun submitApplication(command: com.socoolheeya.bluebank.card.data.domain.command.CardApplicationCommand.Submit) = result
     override fun getApplication(applicationId: Long) = if (applicationId == 2L) result else null
     override fun getApplicationsByCustomerId(customerId: Long) = if (customerId == 7L) listOf(result) else emptyList()
+    override fun markAsIssued(applicationId: Long, cardId: Long) =
+        result.copy(status = com.socoolheeya.bluebank.card.data.domain.CardEnums.CardApplicationStatus.ISSUED, cardId = cardId)
+
+    fun approveForIssue() {
+        result = result.copy(status = com.socoolheeya.bluebank.card.data.domain.CardEnums.CardApplicationStatus.APPROVED)
+    }
 }
 
 val cardControllerSlices by testSuite("Card controller slices") {
@@ -75,6 +83,10 @@ val cardControllerSlices by testSuite("Card controller slices") {
             .andExpect(status().isOk).andExpect(jsonPath("$.id").value(2))
         mvc.perform(get("/api/cards/applications/2")).andExpect(jsonPath("$.customerId").value(7))
         mvc.perform(get("/api/cards/applications/customer/7")).andExpect(jsonPath("$[0].id").value(2))
+        applications.approveForIssue()
+        mvc.perform(post("/api/cards/applications/2/issue"))
+            .andExpect(status().isOk).andExpect(jsonPath("$.applicationId").value(2))
+            .andExpect(jsonPath("$.cardId").value(10)).andExpect(jsonPath("$.cardNumberMasked").isString)
         mvc.perform(post("/api/cards/applications").contentType(MediaType.APPLICATION_JSON).content("{}"))
             .andExpect(status().is5xxServerError)
     }
