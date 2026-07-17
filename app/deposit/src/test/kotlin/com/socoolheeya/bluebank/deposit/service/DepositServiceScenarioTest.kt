@@ -114,7 +114,7 @@ val depositServiceScenarios by testSuite("Deposit service scenarios") {
     }
 
     Scenario("all mutations reject a different owner without changing state", ::DepositScenarioContext) {
-        Given("an account owned by another customer") {
+        Given("an account owned by the deposit customer") {
             accounts.addAccount(9, 7)
         }
         When("each mutation is attempted against a fresh deposit by the different owner") {
