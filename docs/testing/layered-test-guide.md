@@ -44,7 +44,9 @@
 ./gradlew build --console=plain
 
 # 전체 fresh layered verification
-./gradlew cleanTest compileKotlin compileTestKotlin test sliceTest integrationTest build --console=plain
+./gradlew cleanTest cleanSliceTest cleanIntegrationTest \
+  compileKotlin compileTestKotlin test sliceTest integrationTest build \
+  --rerun-tasks --console=plain
 ```
 
 집중 검증은 파일/class 이름이 아니라 TestBalloon delegated suite identity에 적용한다. 먼저 owning task를 필터 없이 실행하고 `build/test-results/<task>/TEST-suite_*.xml`에서 identity를 확인한다. 예를 들어 `accountServiceScenarios`, `accountControllerSlices`, `accountDataIntegration`은 각각 `--tests '*<property>*'`로 실제 검증되었다. 실행 후 XML을 집계해 해당 task의 tests가 0보다 큰지 확인한다. 실행한 모든 계층에서 failures/errors는 0, 의도하지 않은 skipped는 0이어야 한다. Gradle exit code가 0이어도 `NO-SOURCE`, tests=0, 필터가 모든 TestBalloon test를 제외한 결과는 검증 성공이 아니다. 동적 중첩 suite/test 하나만 안정적으로 선택할 identity가 없다면 suite보다 좁게 추측하지 말고 owning task 전체를 실행한다.
@@ -56,3 +58,13 @@
 3. gap만 가장 작은 계층에 추가하고 그 task를 먼저 실행한다.
 4. `test`, `sliceTest`, `integrationTest`, `check`, `build`를 위험도에 맞게 확대 실행한다.
 5. XML test count와 failures/errors/skips를 확인하고 선언 감사 및 `git diff --check`를 통과시킨다.
+
+## 리뷰에서 확인할 실패 신호
+
+- 증분 빌드 성공을 clean compile 성공으로 간주하지 않는다. 실제 closeout에서는 증분 실행이 숨긴 테스트 소스 오타를 `cleanTest`가 발견했다.
+- 공유 Spring context에서 각 test가 `cleanDatabase()`를 호출하게 두지 않는다. context를 test가 `use`로 닫거나, 안전한 suite fixture와 `TestCompartment.Sequential`을 함께 사용한다.
+- 상태 이름 하나만 확인하지 않는다. 카드 발급은 실제 card row, application의 `cardId`, 최종 `ISSUED` 상태를 repository 재조회로 함께 검증한다.
+- 서로 다른 값을 넣고 결과가 다름을 기대하는 assertion은 false-positive 신호다. 대출 승인은 approved amount/rate가 생성된 loan의 principal, outstanding balance, interest rate와 정확히 일치해야 한다.
+- 금융 경계는 정상값만 검증하지 않는다. 0·음수 금액, 잔액 초과, 정확한 DSR 한계와 한계 직후 값을 포함하고 실패 후 잔액·원장·상태가 보존되는지 확인한다.
+
+2026-07-17 전체 검증에서는 `test` 71개, `sliceTest` 15개, `integrationTest` 16개가 실행되었고 failures/errors/skips는 모두 0이었다.
