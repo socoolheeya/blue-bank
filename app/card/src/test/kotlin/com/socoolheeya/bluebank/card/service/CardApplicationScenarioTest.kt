@@ -7,7 +7,9 @@ import com.socoolheeya.bluebank.card.data.domain.result.CardApplicationResult
 import com.socoolheeya.bluebank.card.dto.CardApplicationDto
 import com.socoolheeya.bluebank.card.testing.FakeCardApplicationDataService
 import com.socoolheeya.bluebank.card.testing.FakeCardDataService
+import com.socoolheeya.bluebank.testing.Scenario
 import de.infix.testBalloon.framework.core.testSuite
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 private fun request(product: CardProductType = CardProductType.FRIENDS_CHECK, moim: Long? = null) = CardApplicationDto.Request(
@@ -20,48 +22,90 @@ private fun request(product: CardProductType = CardProductType.FRIENDS_CHECK, mo
 private fun approved() = CardApplicationResult(1, 7, 9, CardType.DEBIT, CardProductType.FRIENDS_CHECK, "KIM", "010", null,
     "BLUE", null, false, CardApplicationStatus.APPROVED, null, null, null, LocalDateTime.now(), LocalDateTime.now())
 
+private class CardApplicationScenarioContext {
+    val applications = FakeCardApplicationDataService()
+    val cards = FakeCardDataService()
+    val service = CardApplicationService(applications, cards)
+    var applicationRequest: CardApplicationDto.Request? = null
+    var response: CardApplicationDto.Response? = null
+    var issueResponse: CardApplicationDto.IssueResponse? = null
+    var application: CardApplicationDto.Response? = null
+    var customerApplications: List<CardApplicationDto.Response> = emptyList()
+    var failure: Throwable? = null
+    var secondFailure: Throwable? = null
+    var before: LocalDate? = null
+    var after: LocalDate? = null
+}
+
 val cardApplicationScenarios by testSuite("Card application scenarios") {
-    test("submission maps every application boundary and supports lookup") {
-        val applications = FakeCardApplicationDataService()
-        val service = CardApplicationService(applications, FakeCardDataService())
-        val response = service.applyForCard(request())
-        val command = applications.submitted.single()
-        check(response.id == 1L)
-        check(command.customerId == 7L && command.accountId == 9L && command.cardType == CardType.DEBIT)
-        check(command.productType == CardProductType.FRIENDS_CHECK && command.applicantName == "KIM")
-        check(command.residentNumber == "000000-0000000" && command.phoneNumber == "010" && command.email == "a@b.c")
-        check(command.address == "Seoul" && command.designCode == "BLUE" && command.customText == "HELLO")
-        check(command.requestTransitCard && !command.requestOverseasUsage && command.moimAccountId == null)
-        check(command.annualIncome == java.math.BigDecimal("70000000") && command.employmentType == "FULL_TIME")
-        check(command.companyName == "BLUE" && command.creditScore == 900 && command.requestedCreditLimit == java.math.BigDecimal("5000000"))
-        check(service.getApplication(1).customerId == 7L)
-        check(service.getApplicationsByCustomerId(7).size == 1)
-        check(runCatching { service.getApplication(99) }.exceptionOrNull() is NoSuchElementException)
+    Scenario("submission maps every application boundary and supports lookup", ::CardApplicationScenarioContext) {
+        Given("a complete card application request") {
+            applicationRequest = request()
+        }
+        When("the request is submitted and applications are looked up") {
+            response = service.applyForCard(applicationRequest!!)
+            application = service.getApplication(1)
+            customerApplications = service.getApplicationsByCustomerId(7)
+            failure = runCatching { service.getApplication(99) }.exceptionOrNull()
+        }
+        Then("every request field and lookup result is preserved") {
+            val command = applications.submitted.single()
+            check(response!!.id == 1L)
+            check(command.customerId == 7L && command.accountId == 9L && command.cardType == CardType.DEBIT)
+            check(command.productType == CardProductType.FRIENDS_CHECK && command.applicantName == "KIM")
+            check(command.residentNumber == "000000-0000000" && command.phoneNumber == "010" && command.email == "a@b.c")
+            check(command.address == "Seoul" && command.designCode == "BLUE" && command.customText == "HELLO")
+            check(command.requestTransitCard && !command.requestOverseasUsage && command.moimAccountId == null)
+            check(command.annualIncome == java.math.BigDecimal("70000000") && command.employmentType == "FULL_TIME")
+            check(command.companyName == "BLUE" && command.creditScore == 900 && command.requestedCreditLimit == java.math.BigDecimal("5000000"))
+            check(application!!.customerId == 7L)
+            check(customerApplications.size == 1)
+            check(failure is NoSuchElementException)
+        }
     }
 
-    test("moim application requires a meeting account") {
-        val service = CardApplicationService(FakeCardApplicationDataService(), FakeCardDataService())
-        check(runCatching { service.applyForCard(request(CardProductType.MOIM_CHECK)) }.exceptionOrNull() is IllegalArgumentException)
+    Scenario("moim application requires a meeting account", ::CardApplicationScenarioContext) {
+        Given("a moim card request without a meeting account") {
+            applicationRequest = request(CardProductType.MOIM_CHECK)
+        }
+        When("the moim request is submitted") {
+            failure = runCatching { service.applyForCard(applicationRequest!!) }.exceptionOrNull()
+        }
+        Then("the missing meeting account is rejected") {
+            check(failure is IllegalArgumentException)
+        }
     }
 
-    test("approved application issues a stable shaped card and marks application issued") {
-        val applications = FakeCardApplicationDataService().apply { this.applications[1] = approved() }
-        val cards = FakeCardDataService()
-        val before = java.time.LocalDate.now()
-        val response = CardApplicationService(applications, cards).issueCard(1)
-        val after = java.time.LocalDate.now()
-        val command = cards.created.single()
-        check(response.cardId == 100L && response.cardNumberMasked.matches(Regex("5234-\\*{4}-\\*{4}-\\d{4}")))
-        check(command.cardNumber.length == 16)
-        check(!command.expiryDate.isBefore(before.plusYears(5)) && !command.expiryDate.isAfter(after.plusYears(5)))
-        check(applications.issued.single() == (1L to 100L))
+    Scenario("approved application issues a stable shaped card and marks application issued", ::CardApplicationScenarioContext) {
+        Given("an approved card application") {
+            applications.applications[1] = approved()
+            before = LocalDate.now()
+        }
+        When("the approved application is issued") {
+            issueResponse = service.issueCard(1)
+            after = LocalDate.now()
+        }
+        Then("the card shape expiry and issued link are stable") {
+            val command = cards.created.single()
+            check(issueResponse!!.cardId == 100L && issueResponse!!.cardNumberMasked.matches(Regex("5234-\\*{4}-\\*{4}-\\d{4}")))
+            check(command.cardNumber.length == 16)
+            check(!command.expiryDate.isBefore(before!!.plusYears(5)) && !command.expiryDate.isAfter(after!!.plusYears(5)))
+            check(applications.issued.single() == (1L to 100L))
+        }
     }
 
-    test("issuance rejects missing and unapproved applications") {
-        val applications = FakeCardApplicationDataService()
-        val service = CardApplicationService(applications, FakeCardDataService())
-        check(runCatching { service.issueCard(1) }.exceptionOrNull() is NoSuchElementException)
-        applications.applications[1] = approved().copy(status = CardApplicationStatus.SUBMITTED)
-        check(runCatching { service.issueCard(1) }.exceptionOrNull() is IllegalArgumentException)
+    Scenario("issuance rejects missing and unapproved applications", ::CardApplicationScenarioContext) {
+        Given("no application exists") {
+            check(applications.applications.isEmpty())
+        }
+        When("a missing application and then an unapproved application are issued") {
+            failure = runCatching { service.issueCard(1) }.exceptionOrNull()
+            applications.applications[1] = approved().copy(status = CardApplicationStatus.SUBMITTED)
+            secondFailure = runCatching { service.issueCard(1) }.exceptionOrNull()
+        }
+        Then("both invalid issuance attempts fail") {
+            check(failure is NoSuchElementException)
+            check(secondFailure is IllegalArgumentException)
+        }
     }
 }
