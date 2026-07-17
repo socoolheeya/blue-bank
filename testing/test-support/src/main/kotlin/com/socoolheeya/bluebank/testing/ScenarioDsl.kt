@@ -1,5 +1,7 @@
 package com.socoolheeya.bluebank.testing
 
+import de.infix.testBalloon.framework.core.Test
+import de.infix.testBalloon.framework.core.TestFixture
 import de.infix.testBalloon.framework.core.TestSuiteScope
 
 class ScenarioScope<C>(private val context: C) {
@@ -15,6 +17,15 @@ class ScenarioScope<C>(private val context: C) {
         } catch (failure: AssertionError) {
             throw AssertionError("$kind: $description", failure)
         }
+    }
+}
+
+fun <C : Any> TestFixture.Scope<suspend C.(Test.ExecutionScope) -> Unit>.Scenario(
+    name: String,
+    body: ScenarioScope<C>.() -> Unit,
+) {
+    test(name) {
+        ScenarioScope(this).body()
     }
 }
 

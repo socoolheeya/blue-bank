@@ -7,34 +7,24 @@ private class RecordingContext {
 }
 
 val scenarioDslContract by testSuite("Scenario DSL contract") {
-    var registrationCompleted = false
-    Scenario(
-        name = "context factory runs during test execution",
-        context = {
-            check(registrationCompleted) { "context was created during suite registration" }
-            RecordingContext()
-        },
-    ) {
-        Then("suite registration has completed before context creation") {
-            check(registrationCompleted)
+    testFixture { RecordingContext() } asContextForEach {
+        Scenario("steps share one context in declaration order") {
+            Given("an empty recording") { check(events.isEmpty()); events += "given" }
+            When("an action is recorded") { events += "when" }
+            Then("the ordered recording is visible") { check(events == listOf("given", "when")) }
         }
-    }
-    registrationCompleted = true
-
-    Scenario("steps share one context in declaration order", ::RecordingContext) {
-        Given("an empty recording") { check(events.isEmpty()); events += "given" }
-        When("an action is recorded") { events += "when" }
-        Then("the ordered recording is visible") { check(events == listOf("given", "when")) }
-    }
-
-    Scenario("failure identifies its step", ::RecordingContext) {
-        Then("the assertion fails with step context") {
-            val failure = runCatching {
-                ScenarioScope(this).Then("balance is updated") { error("original") }
-            }.exceptionOrNull()
-            check(failure is AssertionError)
-            check(failure.message == "Then: balance is updated")
-            check(failure.cause?.message == "original")
+        Scenario("each scenario receives fresh state") {
+            Then("the recording starts empty") { check(events.isEmpty()) }
+        }
+        Scenario("failure identifies its step") {
+            Then("the assertion fails with step context") {
+                val failure = runCatching {
+                    ScenarioScope(this).Then("balance is updated") { error("original") }
+                }.exceptionOrNull()
+                check(failure is AssertionError)
+                check(failure.message == "Then: balance is updated")
+                check(failure.cause?.message == "original")
+            }
         }
     }
 }
