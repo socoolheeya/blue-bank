@@ -129,7 +129,7 @@ class LoanApplicationService(
     ): BigDecimal {
         // 간단한 DSR 계산 (실제로는 더 복잡)
         val totalDebt = existingDebt.add(newLoanAmount)
-        return totalDebt.divide(annualIncome, 2, RoundingMode.HALF_UP).multiply(BigDecimal("100"))
+        return totalDebt.multiply(BigDecimal("100")).divide(annualIncome, 10, RoundingMode.HALF_UP)
     }
 
     private fun getMinimumCreditScore(productType: LoanEnums.ProductType): Int {
