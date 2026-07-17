@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 interface CardTransactionRepository : JpaRepository<CardTransaction, Long> {
+    fun findByStatusAndTransactionDateBefore(status: TransactionStatus, transactionDate: LocalDateTime): List<CardTransaction>
     fun findByCardId(cardId: Long): List<CardTransaction>
     fun findByCardIdAndTransactionDateBetween(
         cardId: Long,

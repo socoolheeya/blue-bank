@@ -10,8 +10,8 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-@Entity
-@Table(name = "interest_payment")
+@Entity(name = "DepositInterestPayment")
+@Table(name = "deposit_interest_payment")
 class InterestPayment(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,

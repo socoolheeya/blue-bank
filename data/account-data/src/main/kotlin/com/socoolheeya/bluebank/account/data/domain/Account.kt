@@ -29,6 +29,7 @@ class Account(
     @Enumerated(EnumType.STRING)
     var status: AccountEnums.AccountStatus = AccountEnums.AccountStatus.ACTIVE,
 
+    @Column(precision = 8, scale = 6)
     var interestRate: BigDecimal = BigDecimal.ZERO,
 
     var openedAt: LocalDateTime? = null,

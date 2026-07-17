@@ -1,3 +1,28 @@
 spring:
   application:
     name: batch
+  main:
+    web-application-type: none
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+  datasource:
+    url: jdbc:h2:mem:bluebank-batch;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+blue-bank:
+  batch:
+    eod:
+      schedule-enabled: false
+      cron: "0 0 1 * * *"
+      chunk-size: 100
+      skip-limit: 100
+      account-maintenance-fee: 0
+      domestic-card-settlement-rate: 0.001
+      overseas-card-settlement-rate: 0.003

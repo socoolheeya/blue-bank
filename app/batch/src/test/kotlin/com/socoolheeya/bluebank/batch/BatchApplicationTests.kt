@@ -1,4 +1,4 @@
-package com.socoolheeya.batch
+package com.socoolheeya.bluebank.batch
 
 import de.infix.testBalloon.framework.core.testSuite
 import org.springframework.boot.WebApplicationType

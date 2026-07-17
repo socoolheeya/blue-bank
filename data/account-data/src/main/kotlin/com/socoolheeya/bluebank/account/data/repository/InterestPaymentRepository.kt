@@ -12,6 +12,6 @@ interface InterestPaymentRepository : JpaRepository<InterestPayment, Long> {
     fun findByAccountIdOrderByPaidAtDesc(accountId: Long): List<InterestPayment>
     fun findByAccountIdAndCalculationPeriodStartBetween(accountId: Long, start: LocalDate, end: LocalDate): List<InterestPayment>
 
-    @Query("SELECT SUM(ip.amount) FROM InterestPayment ip WHERE ip.accountId = :accountId")
+    @Query("SELECT SUM(ip.amount) FROM AccountInterestPayment ip WHERE ip.accountId = :accountId")
     fun getTotalInterestByAccountId(accountId: Long): BigDecimal?
 }
