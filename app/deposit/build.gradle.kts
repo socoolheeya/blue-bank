@@ -38,11 +38,6 @@ dependencies {
     testImplementation(project(":testing:test-support"))
 }
 
-sourceSets.named("sliceTest") {
-    compileClasspath += sourceSets.main.get().output
-    runtimeClasspath += sourceSets.main.get().output
-}
-
 kotlin {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")

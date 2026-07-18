@@ -53,10 +53,9 @@ TestBalloon 테스트는 top-level delegated `testSuite`로 등록하고, 중첩
 
 ## 실행과 유효성 규칙
 
-- `test`: 도메인, 변환기, 서비스 시나리오처럼 Spring/실제 저장소가 필요 없는 빠른 테스트를 실행한다.
-- `sliceTest`: controller HTTP binding, JSON, validation, exception mapping을 제한된 Spring MVC 경계에서 실행한다.
+- `test`: `src/test`의 도메인·서비스 시나리오와 controller HTTP binding, JSON, validation, exception mapping 테스트를 실행한다.
 - `integrationTest`: 실제 Spring context와 H2 repository/transaction 경계를 실행한다.
-- `check`: 해당 모듈의 세 계층(`test`, `sliceTest`, `integrationTest`)을 검증 lifecycle로 실행한다.
+- `check`: 해당 모듈의 `test`와 `integrationTest`를 검증 lifecycle로 실행한다.
 - `build`: compile, package, `check`를 포함하는 최종 모듈/루트 lifecycle이다.
 
 검증 대상으로 선언한 모든 task는 XML 결과에서 **0보다 큰 test count**를 보고해야 한다. `NO-SOURCE`, 0 tests, 필터로 인한 전부 제외는 성공으로 간주하지 않는다. failures와 errors는 0이어야 하며, 의도하지 않은 skipped test도 0이어야 한다. 특정 계층을 소유하지 않는 모듈의 0건 결과는 루트 집계에서 성공한 계층으로 세지 말고, 그 계층을 소유한 모듈 task를 명시적으로 확인한다.
@@ -65,7 +64,7 @@ TestBalloon 테스트는 top-level delegated `testSuite`로 등록하고, 중첩
 
 ```bash
 ./gradlew :app:account:test --tests '*accountServiceScenarios*' --console=plain
-./gradlew :app:account:sliceTest --tests '*accountControllerSlices*' --console=plain
+./gradlew :app:account:test --tests '*accountControllerSlices*' --console=plain
 ./gradlew :data:account-data:integrationTest --tests '*accountDataIntegration*' --console=plain
 ```
 

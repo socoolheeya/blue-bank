@@ -35,7 +35,6 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
     testImplementation("org.springframework:spring-test")
     testImplementation("com.jayway.jsonpath:json-path:2.9.0")
-    add("sliceTestImplementation", sourceSets["main"].output)
 }
 
 dependencyManagement {

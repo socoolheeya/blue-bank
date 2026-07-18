@@ -29,7 +29,8 @@ private class LoanServiceScenarioContext {
 }
 
 val loanServiceScenarios by testSuite("Loan service scenarios") {
-    Scenario("get list and missing loan cover public queries", ::LoanServiceScenarioContext) {
+    testFixture { LoanServiceScenarioContext() } asContextForEach {
+    Scenario("get list and missing loan cover public queries") {
         Given("loans for the requested customer and another customer") {
             data.add(loan(99))
         }
@@ -44,7 +45,7 @@ val loanServiceScenarios by testSuite("Loan service scenarios") {
             check(failure is NoSuchElementException)
         }
     }
-    Scenario("execute maps loan and account identifiers", ::LoanServiceScenarioContext) {
+    Scenario("execute maps loan and account identifiers") {
         When("the stored loan is executed") {
             response = service.executeLoan(added.id!!)
         }
@@ -53,7 +54,7 @@ val loanServiceScenarios by testSuite("Loan service scenarios") {
             check(data.executeCommands.single() == LoanCommand.Execute(added.id!!, 7))
         }
     }
-    Scenario("repay preserves fractional amount and missing mutations fail", ::LoanServiceScenarioContext) {
+    Scenario("repay preserves fractional amount and missing mutations fail") {
         When("a cent is repaid and missing loans are executed and repaid") {
             response = service.repayLoan(added.id!!, BigDecimal("0.01"))
             failure = runCatching { service.executeLoan(404) }.exceptionOrNull()
@@ -65,5 +66,6 @@ val loanServiceScenarios by testSuite("Loan service scenarios") {
             check(failure is NoSuchElementException)
             check(secondFailure is NoSuchElementException)
         }
+    }
     }
 }

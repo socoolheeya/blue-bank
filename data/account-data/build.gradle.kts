@@ -26,7 +26,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     testImplementation("de.infix.testBalloon:testBalloon-framework-core:1.0.0-K2.3.20")
     testRuntimeOnly("com.h2database:h2")
-    add("sliceTestImplementation", sourceSets["main"].output)
     add("integrationTestImplementation", sourceSets["main"].output)
 }
 

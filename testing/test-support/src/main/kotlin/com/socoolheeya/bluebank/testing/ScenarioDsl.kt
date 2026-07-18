@@ -2,7 +2,6 @@ package com.socoolheeya.bluebank.testing
 
 import de.infix.testBalloon.framework.core.Test
 import de.infix.testBalloon.framework.core.TestFixture
-import de.infix.testBalloon.framework.core.TestSuiteScope
 
 class ScenarioScope<C>(private val context: C) {
     fun Given(description: String, action: C.() -> Unit) = step("Given", description, action)
@@ -26,15 +25,5 @@ fun <C : Any> TestFixture.Scope<suspend C.(Test.ExecutionScope) -> Unit>.Scenari
 ) {
     test(name) {
         ScenarioScope(this).body()
-    }
-}
-
-fun <C> TestSuiteScope.Scenario(
-    name: String,
-    context: () -> C,
-    body: ScenarioScope<C>.() -> Unit,
-) {
-    test(name) {
-        ScenarioScope(context()).body()
     }
 }
