@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: blue-bank-nks
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: blue-bank
+  source:
+    repoURL: https://github.com/socoolheeya/blue-bank.git
+    targetRevision: main
+    path: deploy/helm/blue-bank
+    helm:
+      valueFiles:
+        - values-nks.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: blue-bank
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

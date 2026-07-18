@@ -1,0 +1,9 @@
+services:
+  account:
+    image: { repository: blue-bank/account, tag: dev, pullPolicy: IfNotPresent }
+  loan:
+    image: { repository: blue-bank/loan, tag: dev, pullPolicy: IfNotPresent }
+  card:
+    image: { repository: blue-bank/card, tag: dev, pullPolicy: IfNotPresent }
+  deposit:
+    image: { repository: blue-bank/deposit, tag: dev, pullPolicy: IfNotPresent }

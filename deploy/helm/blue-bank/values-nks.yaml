@@ -1,0 +1,17 @@
+imagePullSecrets:
+  - name: ncr-pull-secret
+
+services:
+  account:
+    replicas: 2
+    image: { repository: REGISTRY_ENDPOINT/blue-bank-account, tag: GIT_SHA, pullPolicy: IfNotPresent }
+    service: { type: LoadBalancer }
+  loan:
+    replicas: 2
+    image: { repository: REGISTRY_ENDPOINT/blue-bank-loan, tag: GIT_SHA, pullPolicy: IfNotPresent }
+  card:
+    replicas: 2
+    image: { repository: REGISTRY_ENDPOINT/blue-bank-card, tag: GIT_SHA, pullPolicy: IfNotPresent }
+  deposit:
+    replicas: 2
+    image: { repository: REGISTRY_ENDPOINT/blue-bank-deposit, tag: GIT_SHA, pullPolicy: IfNotPresent }

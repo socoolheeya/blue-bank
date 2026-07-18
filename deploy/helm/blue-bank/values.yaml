@@ -1,0 +1,96 @@
+nameOverride: ""
+fullnameOverride: ""
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  name: ""
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  runAsNonRoot: true
+  runAsUser: 10001
+
+services:
+  account:
+    replicas: 1
+    port: 8081
+    image:
+      repository: blue-bank/account
+      tag: dev
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+    env:
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:accountdb
+  loan:
+    replicas: 1
+    port: 8082
+    image:
+      repository: blue-bank/loan
+      tag: dev
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+    env:
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:loandb
+      FEIGN_ACCOUNT_URL: http://blue-bank-account:8081
+  card:
+    replicas: 1
+    port: 8083
+    image:
+      repository: blue-bank/card
+      tag: dev
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+    env:
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:carddb
+      FEIGN_ACCOUNT_URL: http://blue-bank-account:8081
+  deposit:
+    replicas: 1
+    port: 8084
+    image:
+      repository: blue-bank/deposit
+      tag: dev
+      pullPolicy: IfNotPresent
+    service:
+      type: ClusterIP
+    env:
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:depositdb
+      FEIGN_ACCOUNT_URL: http://blue-bank-account:8081
+
+commonEnv:
+  SPRING_PROFILES_ACTIVE: kubernetes
+  EUREKA_CLIENT_ENABLED: "false"
+  SPRING_CLOUD_DISCOVERY_ENABLED: "false"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 768Mi
+
+probes:
+  startup:
+    failureThreshold: 30
+    periodSeconds: 5
+  readiness:
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  liveness:
+    initialDelaySeconds: 20
+    periodSeconds: 20

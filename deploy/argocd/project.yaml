@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: blue-bank
+  namespace: argocd
+spec:
+  description: Blue Bank applications
+  sourceRepos:
+    - https://github.com/socoolheeya/blue-bank.git
+  destinations:
+    - namespace: blue-bank
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
