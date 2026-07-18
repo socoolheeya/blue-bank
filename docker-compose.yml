@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Account Service
   account-service:
@@ -10,6 +8,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:h2:mem:accountdb
+      - EUREKA_CLIENT_ENABLED=false
+      - SPRING_CLOUD_DISCOVERY_ENABLED=false
     networks:
       - bluebank-network
 
@@ -23,6 +23,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:h2:mem:depositdb
       - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_CLIENT_ENABLED=false
+      - SPRING_CLOUD_DISCOVERY_ENABLED=false
     depends_on:
       - account-service
     networks:
@@ -39,6 +41,8 @@ services:
       - SPRING_APPLICATION_NAME=loan
       - SPRING_DATASOURCE_URL=jdbc:h2:mem:loandb
       - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_CLIENT_ENABLED=false
+      - SPRING_CLOUD_DISCOVERY_ENABLED=false
     depends_on:
       - account-service
     networks:
@@ -55,6 +59,8 @@ services:
       - SPRING_APPLICATION_NAME=card
       - SPRING_DATASOURCE_URL=jdbc:h2:mem:carddb
       - FEIGN_ACCOUNT_URL=http://account-service:8081
+      - EUREKA_CLIENT_ENABLED=false
+      - SPRING_CLOUD_DISCOVERY_ENABLED=false
     depends_on:
       - account-service
     networks:

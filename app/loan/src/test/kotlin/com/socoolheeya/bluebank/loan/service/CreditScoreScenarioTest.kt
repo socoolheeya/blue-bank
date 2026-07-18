@@ -1,6 +1,6 @@
 package com.socoolheeya.bluebank.loan.service
 
-import com.socoolheeya.bluebank.testing.Scenario
+import com.socoolheeya.bluebank.loan.testing.Scenario
 import de.infix.testBalloon.framework.core.testSuite
 
 private class CreditScoreScenarioContext {

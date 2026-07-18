@@ -4,7 +4,7 @@ import com.socoolheeya.bluebank.deposit.data.domain.DepositEnums.DepositProductT
 import com.socoolheeya.bluebank.deposit.dto.DepositDto
 import com.socoolheeya.bluebank.deposit.testing.FakeAccountServiceClient
 import com.socoolheeya.bluebank.deposit.testing.FakeDepositDataService
-import com.socoolheeya.bluebank.testing.Scenario
+import com.socoolheeya.bluebank.deposit.testing.Scenario
 import de.infix.testBalloon.framework.core.testSuite
 import java.math.BigDecimal
 import java.time.LocalDate

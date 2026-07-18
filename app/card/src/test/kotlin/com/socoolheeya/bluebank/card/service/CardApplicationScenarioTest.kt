@@ -7,7 +7,7 @@ import com.socoolheeya.bluebank.card.data.domain.result.CardApplicationResult
 import com.socoolheeya.bluebank.card.dto.CardApplicationDto
 import com.socoolheeya.bluebank.card.testing.FakeCardApplicationDataService
 import com.socoolheeya.bluebank.card.testing.FakeCardDataService
-import com.socoolheeya.bluebank.testing.Scenario
+import com.socoolheeya.bluebank.card.testing.Scenario
 import de.infix.testBalloon.framework.core.testSuite
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -9,7 +9,7 @@ import com.socoolheeya.bluebank.loan.data.domain.LoanEnums.RepaymentType
 import com.socoolheeya.bluebank.loan.data.domain.command.LoanCommand
 import com.socoolheeya.bluebank.loan.dto.LoanDto
 import com.socoolheeya.bluebank.loan.testing.*
-import com.socoolheeya.bluebank.testing.Scenario
+import com.socoolheeya.bluebank.loan.testing.Scenario
 import de.infix.testBalloon.framework.core.testSuite
 import java.math.BigDecimal
 

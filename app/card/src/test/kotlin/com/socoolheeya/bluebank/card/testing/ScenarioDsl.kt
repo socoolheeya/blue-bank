@@ -1,4 +1,4 @@
-package com.socoolheeya.bluebank.testing
+package com.socoolheeya.bluebank.card.testing
 
 import de.infix.testBalloon.framework.core.Test
 import de.infix.testBalloon.framework.core.TestFixture

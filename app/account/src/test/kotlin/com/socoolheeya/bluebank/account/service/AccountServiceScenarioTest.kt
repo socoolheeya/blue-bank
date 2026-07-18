@@ -4,7 +4,7 @@ import com.socoolheeya.bluebank.account.data.domain.AccountEnums
 import com.socoolheeya.bluebank.account.data.domain.result.AccountResult
 import com.socoolheeya.bluebank.account.dto.AccountDto
 import com.socoolheeya.bluebank.account.testing.FakeAccountDataServices
-import com.socoolheeya.bluebank.testing.Scenario
+import com.socoolheeya.bluebank.account.testing.Scenario
 import de.infix.testBalloon.framework.core.testSuite
 import java.math.BigDecimal
 

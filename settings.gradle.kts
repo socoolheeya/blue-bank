@@ -12,6 +12,3 @@ include("data:account-data")
 include("data:deposit-data")
 include("data:loan-data")
 include("data:card-data")
-
-// Shared testing infrastructure
-include("testing:test-support")

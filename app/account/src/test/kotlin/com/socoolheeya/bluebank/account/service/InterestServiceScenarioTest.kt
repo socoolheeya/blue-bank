@@ -2,7 +2,7 @@ package com.socoolheeya.bluebank.account.service
 
 import com.socoolheeya.bluebank.account.data.domain.InterestPayment
 import com.socoolheeya.bluebank.account.testing.FakeAccountDataServices
-import com.socoolheeya.bluebank.testing.Scenario
+import com.socoolheeya.bluebank.account.testing.Scenario
 import de.infix.testBalloon.framework.core.testSuite
 import java.math.BigDecimal
 import java.time.LocalDate
