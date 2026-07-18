@@ -12,6 +12,7 @@ spec:
     targetRevision: testballoon
     path: deploy/helm/blue-bank
     helm:
+      releaseName: blue-bank
       valueFiles:
         - values-local.yaml
   destination:

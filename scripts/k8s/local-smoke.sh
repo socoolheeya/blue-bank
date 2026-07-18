@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-context="kind-blue-bank"
+context="blue-bank"
 namespace="blue-bank"
 
 for item in account:8081 loan:8082 card:8083 deposit:8084; do

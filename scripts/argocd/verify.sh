@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-context="${KUBE_CONTEXT:-kind-blue-bank}"
+context="${KUBE_CONTEXT:-blue-bank}"
 application="${ARGO_APPLICATION_NAME:-blue-bank-local}"
 
 for _ in {1..60}; do

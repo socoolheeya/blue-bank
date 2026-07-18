@@ -12,6 +12,7 @@ spec:
     targetRevision: main
     path: deploy/helm/blue-bank
     helm:
+      releaseName: blue-bank
       valueFiles:
         - values-nks.yaml
   destination:

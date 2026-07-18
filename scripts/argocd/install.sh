@@ -2,7 +2,7 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-context="${KUBE_CONTEXT:-kind-blue-bank}"
+context="${KUBE_CONTEXT:-blue-bank}"
 argo_version="v3.4.2"
 
 kubectl --context "$context" create namespace argocd --dry-run=client -o yaml | kubectl --context "$context" apply -f -
