@@ -1,0 +1,9 @@
+resources:
+  - account-deployment.yaml
+  - account-service.yaml
+  - deposit-deployment.yaml
+  - deposit-service.yaml
+  - loan-deployment.yaml
+  - loan-service.yaml
+  - card-deployment.yaml
+  - card-service.yaml
