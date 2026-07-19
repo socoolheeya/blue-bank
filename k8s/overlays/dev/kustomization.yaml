@@ -1,13 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
 images:
   - name: account
     newName: blue-bank-dev.kr.ncr.ntruss.com/account
-    newTag: dev-IMAGE_TAG
+    newTag: dev-9bda9c3
   - name: deposit
     newName: blue-bank-dev.kr.ncr.ntruss.com/deposit
-    newTag: dev-IMAGE_TAG
+    newTag: dev-9bda9c3
   - name: loan
     newName: blue-bank-dev.kr.ncr.ntruss.com/loan
-    newTag: dev-IMAGE_TAG
+    newTag: dev-9bda9c3
   - name: card
     newName: blue-bank-dev.kr.ncr.ntruss.com/card
-    newTag: dev-IMAGE_TAG
+    newTag: dev-9bda9c3
