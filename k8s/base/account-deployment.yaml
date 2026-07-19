@@ -17,7 +17,7 @@ spec:
         - name: ncr-registry
       containers:
         - name: account
-          image: blue-bank-dev.kr.ncr.ntruss.com/account:dev-9bda9c3
+          image: blue-bank-dev.kr.ncr.ntruss.com/account:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
