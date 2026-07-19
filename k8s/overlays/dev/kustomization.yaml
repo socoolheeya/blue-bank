@@ -4,15 +4,15 @@ kind: Kustomization
 resources:
   - ../../base
 images:
-  - name: account
+  - name: blue-bank-dev.kr.ncr.ntruss.com/account
     newName: blue-bank-dev.kr.ncr.ntruss.com/account
-    newTag: dev-42e36833f2981ba0bf76ea86881e434e3dd3d086
-  - name: deposit
+    newTag: dev-6760ebf7dd01a5128a16a603847e90507c84cb06
+  - name: blue-bank-dev.kr.ncr.ntruss.com/deposit
     newName: blue-bank-dev.kr.ncr.ntruss.com/deposit
-    newTag: dev-42e36833f2981ba0bf76ea86881e434e3dd3d086
-  - name: loan
+    newTag: dev-6760ebf7dd01a5128a16a603847e90507c84cb06
+  - name: blue-bank-dev.kr.ncr.ntruss.com/loan
     newName: blue-bank-dev.kr.ncr.ntruss.com/loan
-    newTag: dev-42e36833f2981ba0bf76ea86881e434e3dd3d086
-  - name: card
+    newTag: dev-6760ebf7dd01a5128a16a603847e90507c84cb06
+  - name: blue-bank-dev.kr.ncr.ntruss.com/card
     newName: blue-bank-dev.kr.ncr.ntruss.com/card
-    newTag: dev-42e36833f2981ba0bf76ea86881e434e3dd3d086
+    newTag: dev-6760ebf7dd01a5128a16a603847e90507c84cb06
