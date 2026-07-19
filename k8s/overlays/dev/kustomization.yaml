@@ -6,13 +6,13 @@ resources:
 images:
   - name: blue-bank-dev.kr.ncr.ntruss.com/account
     newName: blue-bank-dev.kr.ncr.ntruss.com/account
-    newTag: dev-43fad1b5985d45578cb73de2b5c641b265ddd1f2
+    newTag: dev-e361bf5c69ea6a4cc2368ba2d9a99cbe641b6620
   - name: blue-bank-dev.kr.ncr.ntruss.com/deposit
     newName: blue-bank-dev.kr.ncr.ntruss.com/deposit
-    newTag: dev-43fad1b5985d45578cb73de2b5c641b265ddd1f2
+    newTag: dev-e361bf5c69ea6a4cc2368ba2d9a99cbe641b6620
   - name: blue-bank-dev.kr.ncr.ntruss.com/loan
     newName: blue-bank-dev.kr.ncr.ntruss.com/loan
-    newTag: dev-43fad1b5985d45578cb73de2b5c641b265ddd1f2
+    newTag: dev-e361bf5c69ea6a4cc2368ba2d9a99cbe641b6620
   - name: blue-bank-dev.kr.ncr.ntruss.com/card
     newName: blue-bank-dev.kr.ncr.ntruss.com/card
-    newTag: dev-43fad1b5985d45578cb73de2b5c641b265ddd1f2
+    newTag: dev-e361bf5c69ea6a4cc2368ba2d9a99cbe641b6620
