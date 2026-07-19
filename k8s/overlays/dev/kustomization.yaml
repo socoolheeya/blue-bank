@@ -1,0 +1,13 @@
+images:
+  - name: account
+    newName: blue-bank-dev.kr.ncr.ntruss.com/account
+    newTag: dev-IMAGE_TAG
+  - name: deposit
+    newName: blue-bank-dev.kr.ncr.ntruss.com/deposit
+    newTag: dev-IMAGE_TAG
+  - name: loan
+    newName: blue-bank-dev.kr.ncr.ntruss.com/loan
+    newTag: dev-IMAGE_TAG
+  - name: card
+    newName: blue-bank-dev.kr.ncr.ntruss.com/card
+    newTag: dev-IMAGE_TAG
