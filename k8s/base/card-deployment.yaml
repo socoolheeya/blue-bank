@@ -17,7 +17,7 @@ spec:
         - name: ncr-registry
       containers:
         - name: card
-          image: blue-bank-dev.kr.ncr.ntruss.com/card:dev-IMAGE_TAG
+          image: blue-bank-dev.kr.ncr.ntruss.com/card:dev-9bda9c3
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
