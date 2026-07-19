@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deposit
+  namespace: blue-bank
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: deposit
+  template:
+    metadata:
+      labels:
+        app: deposit
+    spec:
+      imagePullSecrets:
+        - name: ncr-registry
+      containers:
+        - name: deposit
+          image: blue-bank-dev.kr.ncr.ntruss.com/deposit:dev-IMAGE_TAG
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8200
+          env:
+            - name: SERVER_PORT
+              value: "8200"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 20
