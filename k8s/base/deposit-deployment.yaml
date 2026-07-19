@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deposit
+  name: blue-bank-deposit
   namespace: blue-bank
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: deposit
+      app: blue-bank-deposit
   template:
     metadata:
       labels:
-        app: deposit
+        app: blue-bank-deposit
     spec:
       imagePullSecrets:
         - name: ncr-registry
       containers:
         - name: deposit
           image: blue-bank-dev.kr.ncr.ntruss.com/deposit:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8200

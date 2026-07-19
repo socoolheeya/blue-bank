@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: loan
+  name: blue-bank-loan
   namespace: blue-bank
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: loan
+      app: blue-bank-loan
   template:
     metadata:
       labels:
-        app: loan
+        app: blue-bank-loan
     spec:
       imagePullSecrets:
         - name: ncr-registry
       containers:
         - name: loan
           image: blue-bank-dev.kr.ncr.ntruss.com/loan:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8300

@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: card
+  name: blue-bank-card
   namespace: blue-bank
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: card
+      app: blue-bank-card
   template:
     metadata:
       labels:
-        app: card
+        app: blue-bank-card
     spec:
       imagePullSecrets:
         - name: ncr-registry
       containers:
         - name: card
           image: blue-bank-dev.kr.ncr.ntruss.com/card:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8400
