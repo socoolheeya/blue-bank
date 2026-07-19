@@ -9,6 +9,7 @@ on:
       - "data/**"
       - "build.gradle.kts"
       - "settings.gradle.kts"
+      - "k8s/**"
       - ".github/workflows/build-services-dev.yml"
   workflow_dispatch:
 
