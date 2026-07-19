@@ -44,3 +44,14 @@ logging:
   level:
     com.socoolheeya.bluebank.loan: DEBUG
     com.socoolheeya.bluebank.loan.client: DEBUG
+
+# actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true

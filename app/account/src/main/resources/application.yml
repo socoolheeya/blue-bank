@@ -42,3 +42,14 @@ feign:
 logging:
   level:
     com.socoolheeya.bluebank.account.adapter: DEBUG  # Feign Client 로깅
+
+  # actuator
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health
+    endpoint:
+      health:
+        probes:
+          enabled: true
